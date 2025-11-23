@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Calendar Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>📅 AI Calendar Generator</h1>
+            <p>Turn natural language into calendar events</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Side: Input Section -->
+            <section class="input-section">
+                <h2>Add Events</h2>
+                
+                <!-- Manual Event Input (We'll start simple) -->
+                <div class="card">
+                    <h3>Create Event Manually</h3>
+                    <input type="text" id="event-title" placeholder="Event title (e.g., Team Meeting)">
+                    
+                    <label for="event-start">Start Time:</label>
+                    <input type="datetime-local" id="event-start">
+                    
+                    <label for="event-end">End Time:</label>
+                    <input type="datetime-local" id="event-end">
+                    
+                    <input type="text" id="event-location" placeholder="Location (optional)">
+                    
+                    <button onclick="addEvent()" class="btn-primary">➕ Add Event</button>
+                </div>
+
+                <div class="card info-card">
+                    <p>💡 <strong>Pro tip:</strong> Add a few events manually, then download them as an .ics file to import into your calendar!</p>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;">AI features coming in Day 2! 🚀</p>
+                </div>
+            </section>
+
+            <!-- Right Side: Events Display -->
+            <section class="events-section">
+                <h2>Your Events (<span id="event-count">0</span>)</h2>
+                
+                <div id="events-list" class="events-list">
+                    <p class="empty-state">No events yet. Add your first event! 👈</p>
+                </div>
+
+                <button onclick="downloadCalendar()" id="download-btn" class="btn-download" disabled>
+                    📥 Download Calendar (.ics file)
+                </button>
+                
+                <div class="import-instructions" style="margin-top: 20px; font-size: 0.9em; color: #666;">
+                    <strong>After downloading:</strong> Import the .ics file into Google Calendar, Outlook, or Apple Calendar
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="ics-generator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
