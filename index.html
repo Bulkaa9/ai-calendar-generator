@@ -14,49 +14,96 @@
             <p>Turn natural language into calendar events</p>
         </header>
 
-        <div class="main-content">
-            <!-- Left Side: Input Section -->
-            <section class="input-section">
-                <h2>Add Events</h2>
-                
-                <!-- Manual Event Input (We'll start simple) -->
-                <div class="card">
-                    <h3>Create Event Manually</h3>
-                    <input type="text" id="event-title" placeholder="Event title (e.g., Team Meeting)">
+        <div class="main-layout">
+            <!-- Left Column: Events & Add Button -->
+            <div class="left-column">
+                <!-- Events List Section -->
+                <section class="events-section">
+                    <div class="section-header">
+                        <h2>Your Events (<span id="event-count">0</span>)</h2>
+                        <button onclick="downloadCalendar()" id="download-btn" class="btn-download-small" disabled>
+                            📥 Download
+                        </button>
+                    </div>
                     
-                    <label for="event-start">Start Time:</label>
-                    <input type="datetime-local" id="event-start">
-                    
-                    <label for="event-end">End Time:</label>
-                    <input type="datetime-local" id="event-end">
-                    
-                    <input type="text" id="event-location" placeholder="Location (optional)">
-                    
-                    <button onclick="addEvent()" class="btn-primary">➕ Add Event</button>
+                    <div id="events-list" class="events-list">
+                        <p class="empty-state">No events yet. Click "+ Add Event" below! 👇</p>
+                    </div>
+                </section>
+
+                <!-- Add Event Button (Collapsed) -->
+                <div class="add-event-trigger" onclick="toggleAddEvent()" id="add-trigger">
+                    <div class="add-icon">+</div>
+                    <span>Add Event</span>
                 </div>
 
-                <div class="card info-card">
-                    <p>💡 <strong>Pro tip:</strong> Add a few events manually, then download them as an .ics file to import into your calendar!</p>
-                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;">AI features coming in Day 2! 🚀</p>
-                </div>
-            </section>
+                <!-- Add Event Form (Hidden by default) -->
+                <section class="add-event-section" id="add-event-form" style="display: none;">
+                    <div class="section-header">
+                        <h3>Create New Event</h3>
+                        <button onclick="toggleAddEvent()" class="btn-close">✕</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-title">Event Title *</label>
+                        <input type="text" id="event-title" placeholder="e.g., Team Meeting">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="event-start">Start Time *</label>
+                            <input type="datetime-local" id="event-start">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="event-end">End Time *</label>
+                            <input type="datetime-local" id="event-end">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-location">Location</label>
+                        <input type="text" id="event-location" placeholder="Optional">
+                    </div>
 
-            <!-- Right Side: Events Display -->
-            <section class="events-section">
-                <h2>Your Events (<span id="event-count">0</span>)</h2>
-                
-                <div id="events-list" class="events-list">
-                    <p class="empty-state">No events yet. Add your first event! 👈</p>
-                </div>
+                    <div class="form-group">
+                        <label for="event-description">Description</label>
+                        <textarea id="event-description" rows="3" placeholder="Optional"></textarea>
+                    </div>
+                    
+                    <button onclick="addEvent()" class="btn-primary">
+                        ➕ Add Event
+                    </button>
+                </section>
 
-                <button onclick="downloadCalendar()" id="download-btn" class="btn-download" disabled>
-                    📥 Download Calendar (.ics file)
-                </button>
-                
-                <div class="import-instructions" style="margin-top: 20px; font-size: 0.9em; color: #666;">
-                    <strong>After downloading:</strong> Import the .ics file into Google Calendar, Outlook, or Apple Calendar
+                <!-- Info Card -->
+                <div class="info-card">
+                    <p>💡 <strong>Pro tip:</strong> Add events, then download as .ics file to import into your calendar!</p>
+                    <p style="margin-top: 8px; font-size: 0.9em; opacity: 0.8;">AI features coming in Day 2! 🚀</p>
                 </div>
-            </section>
+            </div>
+
+            <!-- Right Column: Calendar View -->
+            <div class="right-column">
+                <section class="calendar-section">
+                    <div class="calendar-header">
+                        <button onclick="changeMonth(-1)" class="btn-nav">‹</button>
+                        <h2 id="current-month">November 2025</h2>
+                        <button onclick="changeMonth(1)" class="btn-nav">›</button>
+                    </div>
+                    
+                    <div class="view-toggle">
+                        <button onclick="setView('day')" id="view-day">Day</button>
+                        <button onclick="setView('week')" id="view-week">Week</button>
+                        <button onclick="setView('month')" id="view-month" class="active">Month</button>
+                        <button onclick="setView('year')" id="view-year">Year</button>
+                    </div>
+                    
+                    <div id="calendar-container" class="calendar-container">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                </section>
+            </div>
         </div>
     </div>
 
