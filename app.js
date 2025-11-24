@@ -3,6 +3,13 @@ let events = [];
 let currentDate = new Date();
 let currentView = 'month';
 
+
+// Helper function to get color for event
+function getEventColor() {
+    return { bg: 'rgba(24, 52, 85, 0.85)', border: 'rgb(24, 52, 85)', text: 'rgb(24, 52, 85)' };
+}
+
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     updateEventsList();
@@ -31,13 +38,31 @@ function addEvent() {
     const location = document.getElementById('event-location').value.trim();
     const description = document.getElementById('event-description').value.trim();
     
+    // Clear previous error states
+    document.getElementById('event-title').classList.remove('error');
+    document.getElementById('event-start').classList.remove('error');
+    document.getElementById('event-end').classList.remove('error');
+    
+    // Validation with visual feedback
+    let hasError = false;
+    
     if (!title) {
-        alert('⚠️ Please enter an event title');
-        return;
+        document.getElementById('event-title').classList.add('error');
+        hasError = true;
     }
     
-    if (!start || !end) {
-        alert('⚠️ Please select start and end times');
+    if (!start) {
+        document.getElementById('event-start').classList.add('error');
+        hasError = true;
+    }
+    
+    if (!end) {
+        document.getElementById('event-end').classList.add('error');
+        hasError = true;
+    }
+    
+    if (hasError) {
+        showCustomAlert('⚠️', 'Missing Required Fields', 'Please fill in all required fields (Title, Start Time, and End Time)');
         return;
     }
     
@@ -45,7 +70,8 @@ function addEvent() {
     const endDate = new Date(end);
     
     if (endDate <= startDate) {
-        alert('⚠️ End time must be after start time');
+        document.getElementById('event-end').classList.add('error');
+        showCustomAlert('⚠️', 'Invalid Time Range', 'End time must be after start time');
         return;
     }
     
@@ -70,8 +96,56 @@ function addEvent() {
     document.getElementById('event-description').value = '';
     
     toggleAddEvent();
-    showMessage('✅ Event added successfully!');
+    showCustomAlert('✅', 'Success!', 'Event added successfully');
 }
+
+// Custom alert dialog
+function showCustomAlert(emoji, title, message) {
+    // Remove existing alert if any
+    const existingAlert = document.getElementById('custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    // Create alert overlay
+    const alertOverlay = document.createElement('div');
+    alertOverlay.id = 'custom-alert';
+    alertOverlay.className = 'custom-alert-overlay';
+    
+    alertOverlay.innerHTML = `
+        <div class="custom-alert-box">
+            <div class="custom-alert-emoji">${emoji}</div>
+            <h2 class="custom-alert-title">${title}</h2>
+            <p class="custom-alert-message">${message}</p>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()">Close</button>
+        </div>
+    `;
+    
+    document.body.appendChild(alertOverlay);
+    
+    // Fade in animation
+    setTimeout(() => {
+        alertOverlay.classList.add('show');
+    }, 10);
+}
+
+function closeCustomAlert() {
+    const alertOverlay = document.getElementById('custom-alert');
+    if (alertOverlay) {
+        alertOverlay.classList.remove('show');
+        setTimeout(() => {
+            alertOverlay.remove();
+        }, 300);
+    }
+}
+
+// Update showMessage to use custom alert
+function showMessage(message) {
+    const emoji = message.includes('✅') ? '✅' : message.includes('🗑️') ? '🗑️' : message.includes('✏️') ? '✏️' : 'ℹ️';
+    const title = message.includes('✅') ? 'Success!' : message.includes('🗑️') ? 'Deleted' : message.includes('✏️') ? 'Edit Mode' : 'Notice';
+    showCustomAlert(emoji, title, message.replace(/[✅🗑️✏️⚠️]/g, '').trim());
+}
+
 
 // Update events list display
 function updateEventsList() {
@@ -91,17 +165,27 @@ function updateEventsList() {
     
     listEl.innerHTML = events.map(event => {
         const isMultiDay = !isSameDay(event.start, event.end);
+        const color = getEventColor(event.id);
+        
         return `
-        <div class="event-item">
+        <div class="event-item" style="border-left-color: ${color.border};">
             <div class="event-info">
-                <h4>${escapeHtml(event.title)} ${isMultiDay ? '📅' : ''}</h4>
+                <h4>
+                    <span class="event-color-dot" style="background: ${color.bg}; border: 2px solid ${color.border};"></span>
+                    ${escapeHtml(event.title)} ${isMultiDay ? '📅' : ''}
+                </h4>
                 <p>📅 ${formatDate(event.start)}${isMultiDay ? ' - ' + formatDate(event.end) : ''}</p>
                 <p>⏰ ${formatTime(event.start)} - ${formatTime(event.end)}</p>
                 ${event.location ? `<p>📍 ${escapeHtml(event.location)}</p>` : ''}
             </div>
-            <button class="btn-delete" onclick="deleteEvent(${event.id})">
-                🗑️
-            </button>
+            <div class="event-actions">
+                <button class="btn-edit" onclick="editEvent(${event.id})">
+                   <img src="images/image2.jpg" alt="Edit" class="icon-btn">Edit
+                </button>
+                <button class="btn-delete" onclick="deleteEvent(${event.id})">
+                    <img src="images/image3.jpg" alt="Delete" class="icon-btn">Delete
+                </button>
+            </div>
         </div>
     `;
     }).join('');
@@ -115,6 +199,43 @@ function deleteEvent(id) {
         renderCalendar();
         showMessage('🗑️ Event deleted');
     }
+}
+
+// Edit event function
+function editEvent(id) {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
+    
+    // Populate form with event data
+    document.getElementById('event-title').value = event.title;
+    document.getElementById('event-start').value = formatDateTimeLocal(event.start);
+    document.getElementById('event-end').value = formatDateTimeLocal(event.end);
+    document.getElementById('event-location').value = event.location || '';
+    document.getElementById('event-description').value = event.description || '';
+    
+    // Delete the old event (we'll create a new one with the edits)
+    events = events.filter(e => e.id !== id);
+    updateEventsList();
+    renderCalendar();
+    
+    // Open the form
+    const form = document.getElementById('add-event-form');
+    const trigger = document.getElementById('add-trigger');
+    form.style.display = 'block';
+    trigger.style.display = 'none';
+    
+    showMessage('✏️ Editing event. Make changes and click "Add Event" to save.');
+}
+
+// Helper function to format date for datetime-local input
+function formatDateTimeLocal(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 // Navigation to specific date
@@ -203,24 +324,28 @@ function renderDayView(container) {
     
     // Overlay events on timeline
     if (dayEvents.length > 0) {
+        const eventLayout = calculateEventLayout(dayEvents, currentDate);
+        
         html += '<div class="day-view-events-overlay">';
-        dayEvents.forEach(event => {
+        eventLayout.forEach(layoutEvent => {
+            const event = layoutEvent.event;
+            const column = layoutEvent.column;
+            const totalColumns = layoutEvent.totalColumns;
+            const color = getEventColor(event.id);
+            
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
             
-            // Calculate position and height
             let startHour = eventStart.getHours();
             let startMinute = eventStart.getMinutes();
             let endHour = eventEnd.getHours();
             let endMinute = eventEnd.getMinutes();
             
-            // If event starts before this day, start at 0:00
             if (eventStart.toDateString() !== currentDate.toDateString()) {
                 startHour = 0;
                 startMinute = 0;
             }
             
-            // If event ends after this day, end at 23:59
             if (eventEnd.toDateString() !== currentDate.toDateString()) {
                 endHour = 23;
                 endMinute = 59;
@@ -230,8 +355,18 @@ function renderDayView(container) {
             const durationMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
             const heightPercent = (durationMinutes / (24 * 60)) * 100;
             
+            const widthPercent = (100 / totalColumns) - 1;
+            const leftPercent = (column / totalColumns) * 100;
+            
             html += `
-                <div class="day-event-overlay" style="top: ${topPercent}%; height: ${heightPercent}%;">
+                <div class="day-event-overlay" style="
+                    top: ${topPercent}%; 
+                    height: ${heightPercent}%; 
+                    left: ${leftPercent}%;
+                    width: ${widthPercent}%;
+                    background: ${color.bg};
+                    border-left-color: ${color.border};
+                ">
                     <strong>${escapeHtml(event.title)}</strong><br>
                     <span>${formatTime(eventStart)} - ${formatTime(eventEnd)}</span>
                     ${event.location ? `<br><span>📍 ${escapeHtml(event.location)}</span>` : ''}
@@ -243,6 +378,51 @@ function renderDayView(container) {
     
     html += '</div>';
     container.innerHTML = html;
+}
+
+// Helper function to calculate event layout (columns for overlapping events)
+function calculateEventLayout(dayEvents, currentDate) {
+    const sortedEvents = [...dayEvents].sort((a, b) => a.start - b.start);
+    const columns = [];
+    const eventLayout = [];
+    
+    sortedEvents.forEach(event => {
+        const eventStart = new Date(event.start);
+        const eventEnd = new Date(event.end);
+        
+        let column = 0;
+        let foundColumn = false;
+        
+        while (!foundColumn) {
+            if (!columns[column]) {
+                columns[column] = [];
+            }
+            
+            const isColumnFree = columns[column].every(existingEvent => {
+                return existingEvent.end <= eventStart || existingEvent.start >= eventEnd;
+            });
+            
+            if (isColumnFree) {
+                columns[column].push(event);
+                foundColumn = true;
+            } else {
+                column++;
+            }
+        }
+        
+        eventLayout.push({
+            event: event,
+            column: column,
+            totalColumns: 0
+        });
+    });
+    
+    const totalColumns = columns.length;
+    eventLayout.forEach(layout => {
+        layout.totalColumns = totalColumns;
+    });
+    
+    return eventLayout;
 }
 
 function renderWeekView(container) {
@@ -266,11 +446,14 @@ function renderWeekView(container) {
                 </div>
                 <div class="week-events">
                     ${dayEvents.length === 0 ? '<span style="color: #999;">No events</span>' : ''}
-                    ${dayEvents.map(event => `
-                        <div class="week-event-item">
-                            ${formatTime(event.start)} - ${escapeHtml(event.title)}
-                        </div>
-                    `).join('')}
+                    ${dayEvents.map(event => {
+                        const color = getEventColor(event.id);
+                        return `
+                            <div class="week-event-item" style="background: ${color.bg}; border-left: 3px solid ${color.border};">
+                                ${formatTime(event.start)} - ${escapeHtml(event.title)}
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             </div>
         `;
@@ -320,20 +503,27 @@ function renderMonthView(container) {
         
         if (dayEvents.length > 0) {
             html += '<div class="calendar-day-events">';
-            dayEvents.forEach(event => {
-                const isMultiDay = !isSameDay(event.start, event.end);
-                const isFirstDay = isSameDay(event.start, date);
-                const isLastDay = isSameDay(event.end, date);
-                
-                let chipClass = 'calendar-event-chip';
-                if (isMultiDay) {
-                    if (isFirstDay) chipClass += ' multi-day-start';
-                    else if (isLastDay) chipClass += ' multi-day-end';
-                    else chipClass += ' multi-day-middle';
-                }
-                
-                html += `<div class="${chipClass}">${escapeHtml(event.title)}</div>`;
-            });
+            
+            // Show only first event title
+            const firstEvent = dayEvents[0];
+            const isMultiDay = !isSameDay(firstEvent.start, firstEvent.end);
+            const isFirstDay = isSameDay(firstEvent.start, date);
+            const isLastDay = isSameDay(firstEvent.end, date);
+            
+            let chipClass = 'calendar-event-chip';
+            if (isMultiDay) {
+                if (isFirstDay) chipClass += ' multi-day-start';
+                else if (isLastDay) chipClass += ' multi-day-end';
+                else chipClass += ' multi-day-middle';
+            }
+            
+            html += `<div class="${chipClass}">${escapeHtml(firstEvent.title)}</div>`;
+            
+            // Show "..." if more than 1 event
+            if (dayEvents.length > 1) {
+                html += `<div class="calendar-event-more">...</div>`;
+            }
+            
             html += '</div>';
         }
         
@@ -343,6 +533,7 @@ function renderMonthView(container) {
     html += '</div>';
     container.innerHTML = html;
 }
+
 
 function renderYearView(container) {
     const year = currentDate.getFullYear();
@@ -360,12 +551,10 @@ function renderYearView(container) {
         const lastDay = new Date(year, m + 1, 0);
         const startDay = firstDay.getDay();
         
-        // Empty cells
         for (let i = 0; i < startDay; i++) {
             html += '<div class="year-day"></div>';
         }
         
-        // Days
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
