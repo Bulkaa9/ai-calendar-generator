@@ -3,12 +3,13 @@ let events = [];
 let currentDate = new Date();
 let currentView = 'month';
 
+// Time format toggle (12h vs 24h)
+let use24HourFormat = false;
 
 // Helper function to get color for event
 function getEventColor() {
     return { bg: 'rgba(24, 52, 85, 0.85)', border: 'rgb(24, 52, 85)', text: 'rgb(24, 52, 85)' };
 }
-
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
@@ -62,7 +63,6 @@ function addEvent() {
     }
     
     if (hasError) {
-        showCustomAlert('⚠️', 'Missing Required Fields', 'Please fill in all required fields (Title, Start Time, and End Time)');
         return;
     }
     
@@ -71,7 +71,6 @@ function addEvent() {
     
     if (endDate <= startDate) {
         document.getElementById('event-end').classList.add('error');
-        showCustomAlert('⚠️', 'Invalid Time Range', 'End time must be after start time');
         return;
     }
     
@@ -96,56 +95,14 @@ function addEvent() {
     document.getElementById('event-description').value = '';
     
     toggleAddEvent();
-    showCustomAlert('✅', 'Success!', 'Event added successfully');
 }
 
-// Custom alert dialog
-function showCustomAlert(emoji, title, message) {
-    // Remove existing alert if any
-    const existingAlert = document.getElementById('custom-alert');
-    if (existingAlert) {
-        existingAlert.remove();
-    }
-    
-    // Create alert overlay
-    const alertOverlay = document.createElement('div');
-    alertOverlay.id = 'custom-alert';
-    alertOverlay.className = 'custom-alert-overlay';
-    
-    alertOverlay.innerHTML = `
-        <div class="custom-alert-box">
-            <div class="custom-alert-emoji">${emoji}</div>
-            <h2 class="custom-alert-title">${title}</h2>
-            <p class="custom-alert-message">${message}</p>
-            <button class="custom-alert-btn" onclick="closeCustomAlert()">Close</button>
-        </div>
-    `;
-    
-    document.body.appendChild(alertOverlay);
-    
-    // Fade in animation
-    setTimeout(() => {
-        alertOverlay.classList.add('show');
-    }, 10);
+// Delete event function
+function deleteEvent(id) {
+    events = events.filter(event => event.id !== id);
+    updateEventsList();
+    renderCalendar();
 }
-
-function closeCustomAlert() {
-    const alertOverlay = document.getElementById('custom-alert');
-    if (alertOverlay) {
-        alertOverlay.classList.remove('show');
-        setTimeout(() => {
-            alertOverlay.remove();
-        }, 300);
-    }
-}
-
-// Update showMessage to use custom alert
-function showMessage(message) {
-    const emoji = message.includes('✅') ? '✅' : message.includes('🗑️') ? '🗑️' : message.includes('✏️') ? '✏️' : 'ℹ️';
-    const title = message.includes('✅') ? 'Success!' : message.includes('🗑️') ? 'Deleted' : message.includes('✏️') ? 'Edit Mode' : 'Notice';
-    showCustomAlert(emoji, title, message.replace(/[✅🗑️✏️⚠️]/g, '').trim());
-}
-
 
 // Update events list display
 function updateEventsList() {
@@ -174,8 +131,8 @@ function updateEventsList() {
                     <span class="event-color-dot" style="background: ${color.bg}; border: 2px solid ${color.border};"></span>
                     ${escapeHtml(event.title)} ${isMultiDay ? '📅' : ''}
                 </h4>
-                <p>📅 ${formatDate(event.start)}${isMultiDay ? ' - ' + formatDate(event.end) : ''}</p>
-                <p>⏰ ${formatTime(event.start)} - ${formatTime(event.end)}</p>
+                <p>📅 ${formatDate(event.start)}${isMultiDay ? ' → ' + formatDate(event.end) : ''}</p>
+                <p>🕐 ${formatTime(event.start)} - ${formatTime(event.end)}</p>
                 ${event.location ? `<p>📍 ${escapeHtml(event.location)}</p>` : ''}
             </div>
             <div class="event-actions">
@@ -189,16 +146,6 @@ function updateEventsList() {
         </div>
     `;
     }).join('');
-}
-
-// Delete event function
-function deleteEvent(id) {
-    if (confirm('Are you sure you want to delete this event?')) {
-        events = events.filter(event => event.id !== id);
-        updateEventsList();
-        renderCalendar();
-        showMessage('🗑️ Event deleted');
-    }
 }
 
 // Edit event function
@@ -223,8 +170,6 @@ function editEvent(id) {
     const trigger = document.getElementById('add-trigger');
     form.style.display = 'block';
     trigger.style.display = 'none';
-    
-    showMessage('✏️ Editing event. Make changes and click "Add Event" to save.');
 }
 
 // Helper function to format date for datetime-local input
@@ -313,11 +258,10 @@ function renderDayView(container) {
     html += '<div class="day-view-timeline">';
     
     for (let hour = 0; hour < 24; hour++) {
-        const hourStr = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
-        html += `<div class="timeline-hour">
-            <div class="timeline-label">${hourStr}</div>
-            <div class="timeline-slot"></div>
-        </div>`;
+        html += '<div class="timeline-hour">';
+        html += `<div class="timeline-label">${formatHourLabel(hour)}</div>`;
+        html += '<div class="timeline-slot"></div>';
+        html += '</div>';
     }
     
     html += '</div>';
@@ -534,7 +478,6 @@ function renderMonthView(container) {
     container.innerHTML = html;
 }
 
-
 function renderYearView(container) {
     const year = currentDate.getFullYear();
     let html = '<div class="calendar-year">';
@@ -613,11 +556,30 @@ function formatDate(date) {
     });
 }
 
-function formatTime(date) {
-    return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+function formatTime(date, format24h = use24HourFormat) {
+    if (format24h) {
+        // 24-hour format: "14:30"
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    } else {
+        // 12-hour format: "2:30 PM"
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+}
+
+function formatHourLabel(hour, format24h = use24HourFormat) {
+    if (format24h) {
+        // 24-hour format: "14:00"
+        return `${String(hour).padStart(2, '0')}:00`;
+    } else {
+        // 12-hour format: "2 PM"
+        if (hour === 0) return '12 AM';
+        if (hour === 12) return '12 PM';
+        return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+    }
 }
 
 function escapeHtml(text) {
@@ -626,14 +588,9 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function showMessage(message) {
-    alert(message);
-}
-
 // Download calendar function
 function downloadCalendar() {
     if (events.length === 0) {
-        alert('⚠️ No events to download');
         return;
     }
     
@@ -643,6 +600,16 @@ function downloadCalendar() {
     link.href = URL.createObjectURL(blob);
     link.download = `my-calendar-${Date.now()}.ics`;
     link.click();
-    
-    showMessage('✅ Calendar downloaded! You can now import it into Google Calendar, Outlook, or Apple Calendar.');
 }
+
+// Time format toggle function
+function toggleTimeFormat() {
+    use24HourFormat = !use24HourFormat;
+    const btn = document.getElementById('time-format-btn');
+    btn.textContent = use24HourFormat ? '🕐 Switch to 12h' : '🕐 Switch to 24h';
+    
+    // Re-render current view
+    updateEventsList();
+    renderCalendar();
+}
+
