@@ -313,7 +313,7 @@ function renderDayView(container) {
                 ">
                     <strong>${escapeHtml(event.title)}</strong><br>
                     <span>${formatTime(eventStart)} - ${formatTime(eventEnd)}</span>
-                    ${event.location ? `<br><span>📍 ${escapeHtml(event.location)}</span>` : ''}
+                    ${event.location ? `<br><span style="font-size: 0.9em;">📍 ${escapeHtml(event.location)}</span>` : ''}
                 </div>
             `;
         });
@@ -613,3 +613,91 @@ function toggleTimeFormat() {
     renderCalendar();
 }
 
+// Toggle between AI and Manual input modes
+function toggleInputMode() {
+    const aiSection = document.getElementById('ai-input-section');
+    const manualSection = document.getElementById('manual-input-section');
+    const aiToggleBtn = document.getElementById('ai-toggle-btn');
+    
+    if (aiSection.style.display === 'none') {
+        // Show AI, hide manual
+        aiSection.style.display = 'block';
+        manualSection.style.display = 'none';
+        aiToggleBtn.style.display = 'none';
+    } else {
+        // Hide AI, show manual
+        aiSection.style.display = 'none';
+        manualSection.style.display = 'block';
+        aiToggleBtn.style.display = 'block';
+    }
+}
+
+// AI Event Parser with Vercel Backend - CORRECTED TIMEZONE FIX
+async function addAIEvent() {
+    const aiInput = document.getElementById('ai-event-input').value.trim();
+    const aiTextarea = document.getElementById('ai-event-input');
+    
+    if (!aiInput) {
+        aiTextarea.style.borderColor = '#f44336';
+        return;
+    }
+    
+    // Reset border and show loading state
+    aiTextarea.style.borderColor = '#e0e0e0';
+    const aiButton = document.querySelector('#ai-input-section .btn-primary');
+    const originalText = aiButton.innerHTML;
+    aiButton.innerHTML = '<span style="color:#fff;">⏳ Processing...</span>';
+    aiButton.disabled = true;
+    
+    try {
+        const response = await fetch('https://ai-calendar-generator.vercel.app/api/parse-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ input: aiInput })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Backend error: ${response.status}`);
+        }
+
+        const parsedEvent = await response.json();
+        
+        // **CORRECTED FIX: Convert UTC to local time properly**
+        // The backend returns UTC time (e.g., "2025-12-01T16:00:00Z" for 11am EST)
+        // We need to SUBTRACT the timezone offset to get the correct local display time
+        let startDate = new Date(parsedEvent.start);
+        let endDate = new Date(parsedEvent.end);
+        
+        // Subtract timezone offset (getTimezoneOffset returns minutes, negative for EST)
+        // For EST (UTC-5), getTimezoneOffset() returns 300 (positive)
+        // We SUBTRACT this to convert UTC to local
+        startDate = new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000);
+        endDate = new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000);
+
+        const event = {
+            id: Date.now(),
+            title: parsedEvent.title,
+            start: startDate,
+            end: endDate,
+            location: parsedEvent.location || '',
+            description: parsedEvent.description || ''
+        };
+        
+        events.push(event);
+        updateEventsList();
+        renderCalendar();
+        
+        aiTextarea.value = '';
+        toggleAddEvent();
+        
+    } catch (error) {
+        console.error('AI parsing error:', error);
+        aiTextarea.style.borderColor = '#f44336';
+        alert('Sorry, I couldn\'t understand that. Please try rephrasing or use Manual Input.');
+    } finally {
+        aiButton.innerHTML = originalText;
+        aiButton.disabled = false;
+    }
+}

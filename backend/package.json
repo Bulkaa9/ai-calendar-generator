@@ -1,0 +1,12 @@
+{
+  "name": "ai-calendar-backend",
+  "version": "1.0.0",
+  "description": "Backend API for AI Calendar Generator",
+  "main": "api/parse-event.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/node": "^3.0.0"
+  }
+}

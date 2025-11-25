@@ -1035,3 +1035,86 @@ button:disabled {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(24, 52, 85, 0.3);
 }
+/* AI Input Section */
+.ai-input-section {
+    animation: slideDown 0.3s ease;
+}
+
+.ai-input-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.ai-input-section textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    margin-bottom: 12px;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.ai-input-section textarea:focus {
+    outline: none;
+    border-color: rgb(24, 52, 85);
+    box-shadow: 0 0 0 3px rgba(24, 52, 85, 0.1);
+}
+
+.ai-input-section textarea::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Manual Toggle Button */
+.btn-manual-toggle {
+    width: 100%;
+    padding: 10px 16px;
+    background: white;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 12px;
+    font-family: inherit;
+}
+
+.btn-manual-toggle:hover {
+    background: #f8f9fa;
+    border-color: #ccc;
+}
+
+/* AI Toggle Button (collapsed state) */
+.btn-ai-toggle {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(24, 52, 85, 0.1);
+    color: rgb(24, 52, 85);
+    border: 2px solid rgba(24, 52, 85, 0.2);
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 16px;
+    font-family: inherit;
+}
+
+.btn-ai-toggle:hover {
+    background: rgba(24, 52, 85, 0.15);
+    border-color: rgba(24, 52, 85, 0.3);
+}
+
+/* Manual Input Section */
+.manual-input-section {
+    animation: slideDown 0.3s ease;
+}
