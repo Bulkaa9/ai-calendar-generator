@@ -149,6 +149,7 @@ function updateEventsList() {
 }
 
 // Edit event function
+// Edit event function
 function editEvent(id) {
     const event = events.find(e => e.id === id);
     if (!event) return;
@@ -165,11 +166,22 @@ function editEvent(id) {
     updateEventsList();
     renderCalendar();
     
-    // Open the form
+    // 1. Open the form container
     const form = document.getElementById('add-event-form');
     const trigger = document.getElementById('add-trigger');
     form.style.display = 'block';
     trigger.style.display = 'none';
+
+    // 2. FORCE SWITCH TO MANUAL MODE
+    // Hide AI section
+    document.getElementById('ai-input-section').style.display = 'none';
+    // Show Manual section
+    document.getElementById('manual-input-section').style.display = 'block';
+    // Show the "Switch to AI" button (so they can go back if they want)
+    document.getElementById('ai-toggle-btn').style.display = 'block';
+    
+    // 3. Scroll to the form so the user sees it immediately
+    form.scrollIntoView({ behavior: 'smooth' });
 }
 
 // Helper function to format date for datetime-local input
@@ -280,39 +292,34 @@ function renderDayView(container) {
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
             
-            // CHANGED: Use local methods (getHours/getMinutes)
             let startHour = eventStart.getHours();
             let startMinute = eventStart.getMinutes();
             let endHour = eventEnd.getHours();
             let endMinute = eventEnd.getMinutes();
             
-            // Check if event starts on a different day
-            // We compare purely based on local date strings to be safe and simple
             if (eventStart.toDateString() !== currentDate.toDateString()) {
-                // If the event actually started on a previous day
-                if (eventStart < currentDate) {
-                    startHour = 0;
-                    startMinute = 0;
-                }
+                if (eventStart < currentDate) { startHour = 0; startMinute = 0; }
             }
-            
             if (eventEnd.toDateString() !== currentDate.toDateString()) {
-                // If the event ends on a future day
-                if (eventEnd > currentDate) {
-                     endHour = 23;
-                     endMinute = 59;
-                }
+                if (eventEnd > currentDate) { endHour = 23; endMinute = 59; }
             }
             
             const topPercent = ((startHour * 60 + startMinute) / (24 * 60)) * 100;
-            const durationMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
-            const heightPercent = (durationMinutes / (24 * 60)) * 100;
             
+            // Calculate Duration in Minutes
+            const durationMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+            
+            const heightPercent = (durationMinutes / (24 * 60)) * 100;
             const widthPercent = (100 / totalColumns) - 1;
             const leftPercent = (column / totalColumns) * 100;
             
+            // Logic: Only show note if duration >= 150 minutes (2h 30m) AND description exists
+            const showNote = event.description && durationMinutes >= 150;
+            
             html += `
-                <div class="day-event-overlay" style="
+                <div class="day-event-overlay" 
+                    onclick="openEventModal(${event.id}); event.stopPropagation();"
+                    style="
                     top: ${topPercent}%; 
                     height: ${heightPercent}%; 
                     left: ${leftPercent}%;
@@ -320,9 +327,11 @@ function renderDayView(container) {
                     background: ${color.bg};
                     border-left-color: ${color.border};
                 ">
-                    <strong>${escapeHtml(event.title)}</strong><br>
-                    <span>${formatTime(eventStart)} - ${formatTime(eventEnd)}</span>
-                    ${event.location ? `<br><span style="font-size: 0.9em;">📍 ${escapeHtml(event.location)}</span>` : ''}
+                    <strong>${escapeHtml(event.title)}</strong>
+                    <span class="day-event-time">${formatTime(eventStart)} - ${formatTime(eventEnd)}</span>
+                    ${event.location ? `<span class="day-event-location">📍 ${escapeHtml(event.location)}</span>` : ''}
+                    
+                    ${showNote ? `<div class="day-event-note"><strong>Note:</strong> ${escapeHtml(event.description)}</div>` : ''}
                 </div>
             `;
         });
@@ -401,8 +410,11 @@ function renderWeekView(container) {
                     ${dayEvents.length === 0 ? '<span style="color: #999;">No events</span>' : ''}
                     ${dayEvents.map(event => {
                         const color = getEventColor(event.id);
+                        // ADDED ONCLICK HERE
                         return `
-                            <div class="week-event-item" style="background: ${color.bg}; border-left: 3px solid ${color.border};">
+                            <div class="week-event-item" 
+                                 onclick="openEventModal(${event.id}); event.stopPropagation();"
+                                 style="background: ${color.bg}; border-left: 3px solid ${color.border};">
                                 ${formatTime(event.start)} - ${escapeHtml(event.title)}
                             </div>
                         `;
@@ -435,13 +447,12 @@ function renderMonthView(container) {
         html += `<div class="calendar-day-header">${day}</div>`;
     });
     
-    const currentMonth = currentDate.getMonth();
     for (let i = 0; i < 42; i++) {
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);
         
         const isToday = date.getTime() === today.getTime();
-        const isOtherMonth = date.getMonth() !== currentMonth;
+        const isOtherMonth = date.getMonth() !== month;
         
         const dayEvents = events.filter(event => {
             return eventSpansDay(event, date);
@@ -454,27 +465,46 @@ function renderMonthView(container) {
         html += `<div class="${classes}" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()}))">`;
         html += `<div class="calendar-day-number">${date.getDate()}</div>`;
         
+        // --- NEW LOGIC FOR EVENTS ---
         if (dayEvents.length > 0) {
             html += '<div class="calendar-day-events">';
             
-            // Show only first event title
-            const firstEvent = dayEvents[0];
-            const isMultiDay = !isSameDay(firstEvent.start, firstEvent.end);
-            const isFirstDay = isSameDay(firstEvent.start, date);
-            const isLastDay = isSameDay(firstEvent.end, date);
-            
-            let chipClass = 'calendar-event-chip';
-            if (isMultiDay) {
-                if (isFirstDay) chipClass += ' multi-day-start';
-                else if (isLastDay) chipClass += ' multi-day-end';
-                else chipClass += ' multi-day-middle';
-            }
-            
-            html += `<div class="${chipClass}">${escapeHtml(firstEvent.title)}</div>`;
-            
-            // Show "..." if more than 1 event
-            if (dayEvents.length > 1) {
-                html += `<div class="calendar-event-more">...</div>`;
+            // CASE 1: Only 1 Event -> Show the Text Chip
+            if (dayEvents.length === 1) {
+                const event = dayEvents[0];
+                const isMultiDay = !isSameDay(event.start, event.end);
+                const isFirstDay = isSameDay(event.start, date);
+                const isLastDay = isSameDay(event.end, date);
+                
+                let chipClass = 'calendar-event-chip';
+                if (isMultiDay) {
+                    if (isFirstDay) chipClass += ' multi-day-start';
+                    else if (isLastDay) chipClass += ' multi-day-end';
+                    else chipClass += ' multi-day-middle';
+                }
+                
+                html += `<div class="${chipClass}" onclick="openEventModal(${event.id}); event.stopPropagation();">${escapeHtml(event.title)}</div>`;
+            } 
+            // CASE 2: More than 1 Event -> Show Thin Lines
+            else {
+                // Determine how many lines to show
+                const maxLines = 3; // Show up to 3 lines
+                const hasMore = dayEvents.length > maxLines;
+                const limit = hasMore ? maxLines : dayEvents.length;
+                
+                // Sort events by time
+                const sortedDayEvents = [...dayEvents].sort((a, b) => new Date(a.start) - new Date(b.start));
+
+                for (let j = 0; j < limit; j++) {
+                    const event = sortedDayEvents[j];
+                    // Render thin line
+                    html += `<div class="calendar-event-line" title="${escapeHtml(event.title)}" onclick="openEventModal(${event.id}); event.stopPropagation();"></div>`;
+                }
+                
+                // If more than 3, show the grey bar
+                if (hasMore) {
+                    html += `<div class="calendar-event-more-small" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()})); event.stopPropagation();"></div>`;
+                }
             }
             
             html += '</div>';
@@ -533,13 +563,13 @@ function renderYearView(container) {
     container.innerHTML = html;
 }
 
-// Helper function to check if an event spans a specific day - USE UTC!
+// Helper function to check if an event spans a specific day
 function eventSpansDay(event, date) {
     const eventStart = new Date(event.start);
     const eventEnd = new Date(event.end);
     const checkDate = new Date(date);
     
-    // Normalize times to midnight for accurate date comparison
+    // Normalize times to midnight for accurate date comparison in LOCAL time
     const startDay = new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate());
     const endDay = new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
     const currentDay = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
@@ -567,12 +597,12 @@ function formatDate(date) {
 }
 
 function formatTime(date, format24h = use24HourFormat) {
-    // CHANGED: Use getHours/getMinutes instead of UTC
+    // Use Local Time methods
     if (format24h) {
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     } else {
-        let hours = date.getHours(); // Local time
-        const minutes = String(date.getMinutes()).padStart(2, '0'); // Local time
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12 || 12;
         return `${hours}:${minutes} ${ampm}`;
@@ -581,10 +611,8 @@ function formatTime(date, format24h = use24HourFormat) {
 
 function formatHourLabel(hour, format24h = use24HourFormat) {
     if (format24h) {
-        // 24-hour format: "14:00"
         return `${String(hour).padStart(2, '0')}:00`;
     } else {
-        // 12-hour format: "2 PM"
         if (hour === 0) return '12 AM';
         if (hour === 12) return '12 PM';
         return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
@@ -641,7 +669,7 @@ function toggleInputMode() {
     }
 }
 
-// AI Event Parser - NO TIMEZONE MANIPULATION
+// AI Event Parser - UPDATED WITH USER CONTEXT
 async function addAIEvent() {
     const aiInput = document.getElementById('ai-event-input').value.trim();
     const aiTextarea = document.getElementById('ai-event-input');
@@ -659,35 +687,35 @@ async function addAIEvent() {
     aiButton.disabled = true;
     
     try {
-        // GET USER'S ACTUAL LOCAL TIME (e.g., "Mon Dec 01 2025 15:00:00 GMT-0500")
-        const userNow = new Date().toString(); 
+        // Capture the user's current local time context
+        const userNow = new Date().toString();
 
-        const response = await fetch('/api/parse-event', { // Note: use relative path if on same domain
+        // Fetch from the new root API location (RELATIVE PATH)
+        const response = await fetch('/api/parse-event', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            // SEND LOCAL TIME TO BACKEND
             body: JSON.stringify({ 
                 input: aiInput,
-                userContext: userNow 
+                userContext: userNow  // Sending user context to backend
             })
         });
 
-        if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`Backend error: ${response.status}`);
+        }
 
         const parsedEvent = await response.json();
         
-        // APPLY THE VALUES EXACTLY AS THE AI SENT THEM
-        // We strip the 'Z' just in case the AI adds it out of habit, 
-        // ensuring we use the exact numbers (Floating Time).
-        const cleanStart = parsedEvent.start.replace('Z', '');
-        const cleanEnd = parsedEvent.end.replace('Z', '');
+        // Remove any stray 'Z' to force Floating Time (Browser treats as Local)
+        const cleanStart = parsedEvent.start.replace(/Z$/, '');
+        const cleanEnd = parsedEvent.end.replace(/Z$/, '');
 
         const event = {
             id: Date.now(),
             title: parsedEvent.title,
-            start: new Date(cleanStart), 
+            start: new Date(cleanStart),
             end: new Date(cleanEnd),
             location: parsedEvent.location || '',
             description: parsedEvent.description || ''
@@ -697,6 +725,9 @@ async function addAIEvent() {
         updateEventsList();
         renderCalendar();
         
+        aiTextarea.value = '';
+        toggleAddEvent();
+        
     } catch (error) {
         console.error('AI parsing error:', error);
         aiTextarea.style.borderColor = '#f44336';
@@ -704,5 +735,66 @@ async function addAIEvent() {
     } finally {
         aiButton.innerHTML = originalText;
         aiButton.disabled = false;
+    }
+}
+
+// --- MODAL FUNCTIONS (These make the popup work) ---
+
+function openEventModal(id) {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
+
+    // Populate Modal Data
+    document.getElementById('modal-title').textContent = event.title;
+    document.getElementById('modal-time').textContent = 
+        `${formatDate(event.start)} • ${formatTime(event.start)} - ${formatTime(event.end)}`;
+    
+    // Handle Location
+    const locRow = document.getElementById('modal-loc-row');
+    if (event.location) {
+        document.getElementById('modal-location').textContent = event.location;
+        locRow.style.display = 'flex';
+    } else {
+        locRow.style.display = 'none';
+    }
+
+    // Handle Description
+    const descRow = document.getElementById('modal-desc-row');
+    if (event.description) {
+        document.getElementById('modal-description').textContent = event.description;
+        descRow.style.display = 'flex';
+    } else {
+        descRow.style.display = 'none';
+    }
+
+    // Setup Buttons
+    const editBtn = document.getElementById('modal-edit-btn');
+    const deleteBtn = document.getElementById('modal-delete-btn');
+
+    editBtn.onclick = () => {
+        closeEventModal();
+        editEvent(id);
+    };
+
+    deleteBtn.onclick = () => {
+        if(confirm('Are you sure you want to delete this event?')) {
+            closeEventModal();
+            deleteEvent(id);
+        }
+    };
+
+    // Show Modal
+    document.getElementById('event-modal').style.display = 'flex';
+}
+
+function closeEventModal() {
+    document.getElementById('event-modal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('event-modal');
+    if (event.target === modal) {
+        closeEventModal();
     }
 }
