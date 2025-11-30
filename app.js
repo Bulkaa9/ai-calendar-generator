@@ -97,14 +97,26 @@ function addEvent() {
     toggleAddEvent();
 }
 
-// Delete event function
+// Delete event function (Deletes entire series if applicable)
 function deleteEvent(id) {
-    events = events.filter(event => event.id !== id);
+    const targetEvent = events.find(e => e.id === id);
+    if (!targetEvent) return;
+
+    if (targetEvent.seriesId) {
+        // If it's part of a series, delete ALL events with that seriesId
+        if(confirm('This is a recurring event. Delete all occurrences?')) {
+            events = events.filter(event => event.seriesId !== targetEvent.seriesId);
+        }
+    } else {
+        // Normal single delete
+        events = events.filter(event => event.id !== id);
+    }
+    
     updateEventsList();
     renderCalendar();
 }
 
-// Update events list display
+// Update events list display (Groups Recurring Events)
 function updateEventsList() {
     const listEl = document.getElementById('events-list');
     const countEl = document.getElementById('event-count');
@@ -118,25 +130,46 @@ function updateEventsList() {
         return;
     }
     
+    // Sort by start date
     events.sort((a, b) => a.start - b.start);
     
-    listEl.innerHTML = events.map(event => {
+    // FILTER: Only show one item per Series ID
+    const visibleEvents = [];
+    const processedSeries = new Set();
+
+    events.forEach(event => {
+        if (event.seriesId) {
+            if (!processedSeries.has(event.seriesId)) {
+                processedSeries.add(event.seriesId);
+                visibleEvents.push(event);
+            }
+        } else {
+            visibleEvents.push(event);
+        }
+    });
+    
+    listEl.innerHTML = visibleEvents.map(event => {
         const isMultiDay = !isSameDay(event.start, event.end);
         const color = getEventColor(event.id);
+        const isRecurring = !!event.seriesId; 
         
         return `
         <div class="event-item" style="border-left-color: ${color.border};">
             <div class="event-info">
                 <h4>
                     <span class="event-color-dot" style="background: ${color.bg}; border: 2px solid ${color.border};"></span>
-                    ${escapeHtml(event.title)} ${isMultiDay ? '📅' : ''}
+                    ${escapeHtml(event.title)} 
+                    ${isMultiDay ? '📅' : ''}
+                    ${isRecurring ? '🔁' : ''}
                 </h4>
                 <p>📅 ${formatDate(event.start)}${isMultiDay ? ' → ' + formatDate(event.end) : ''}</p>
                 <p>🕐 ${formatTime(event.start)} - ${formatTime(event.end)}</p>
                 ${event.location ? `<p>📍 ${escapeHtml(event.location)}</p>` : ''}
+                
+                ${isRecurring ? '<p style="font-size:0.8em; color:#2196F3; font-weight:600;">Recurring Event</p>' : ''}
             </div>
             <div class="event-actions">
-                <button class="btn-edit" onclick="editEvent(${event.id})">
+                <button class="btn-edit" onclick="editEvent(${event.id})" ${isRecurring ? 'disabled title="Cannot edit recurring events yet"' : ''}>
                    <img src="images/image2.jpg" alt="Edit" class="icon-btn">Edit
                 </button>
                 <button class="btn-delete" onclick="deleteEvent(${event.id})">
@@ -148,7 +181,7 @@ function updateEventsList() {
     }).join('');
 }
 
-// Edit event function
+
 // Edit event function
 function editEvent(id) {
     const event = events.find(e => e.id === id);
@@ -670,6 +703,7 @@ function toggleInputMode() {
 }
 
 // AI Event Parser - UPDATED WITH USER CONTEXT
+// AI Event Parser - HANDLES MULTIPLE EVENTS / RECURRENCE
 async function addAIEvent() {
     const aiInput = document.getElementById('ai-event-input').value.trim();
     const aiTextarea = document.getElementById('ai-event-input');
@@ -679,7 +713,6 @@ async function addAIEvent() {
         return;
     }
     
-    // Reset border and show loading state
     aiTextarea.style.borderColor = '#e0e0e0';
     const aiButton = document.querySelector('#ai-input-section .btn-primary');
     const originalText = aiButton.innerHTML;
@@ -687,41 +720,42 @@ async function addAIEvent() {
     aiButton.disabled = true;
     
     try {
-        // Capture the user's current local time context
         const userNow = new Date().toString();
 
-        // Fetch from the new root API location (RELATIVE PATH)
         const response = await fetch('/api/parse-event', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                input: aiInput,
-                userContext: userNow  // Sending user context to backend
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input: aiInput, userContext: userNow })
         });
 
-        if (!response.ok) {
-            throw new Error(`Backend error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
-        const parsedEvent = await response.json();
-        
-        // Remove any stray 'Z' to force Floating Time (Browser treats as Local)
-        const cleanStart = parsedEvent.start.replace(/Z$/, '');
-        const cleanEnd = parsedEvent.end.replace(/Z$/, '');
+        const result = await response.json();
+        const newEvents = result.events || []; // Expecting an array now
 
-        const event = {
-            id: Date.now(),
-            title: parsedEvent.title,
-            start: new Date(cleanStart),
-            end: new Date(cleanEnd),
-            location: parsedEvent.location || '',
-            description: parsedEvent.description || ''
-        };
+        if (newEvents.length === 0) throw new Error("No events generated");
+
+        // Generate a Series ID if multiple events were returned (to group them)
+        const seriesId = newEvents.length > 1 ? Date.now() : null;
+
+        newEvents.forEach((parsedEvent, index) => {
+             // Add slight delay to ID to ensure uniqueness
+            const eventId = Date.now() + index; 
+            
+            const cleanStart = parsedEvent.start.replace(/Z$/, '');
+            const cleanEnd = parsedEvent.end.replace(/Z$/, '');
+
+            events.push({
+                id: eventId,
+                seriesId: seriesId, // Links recurring events together
+                title: parsedEvent.title,
+                start: new Date(cleanStart),
+                end: new Date(cleanEnd),
+                location: parsedEvent.location || '',
+                description: parsedEvent.description || ''
+            });
+        });
         
-        events.push(event);
         updateEventsList();
         renderCalendar();
         
@@ -731,7 +765,7 @@ async function addAIEvent() {
     } catch (error) {
         console.error('AI parsing error:', error);
         aiTextarea.style.borderColor = '#f44336';
-        alert('Sorry, I couldn\'t understand that. Please try rephrasing or use Manual Input.');
+        alert('Sorry, I couldn\'t understand that. Please try rephrasing.');
     } finally {
         aiButton.innerHTML = originalText;
         aiButton.disabled = false;

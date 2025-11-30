@@ -1299,3 +1299,16 @@ button:disabled {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+
+/* Disabled Edit Button */
+.btn-edit:disabled {
+    background-color: #ccc; /* Grey */
+    cursor: not-allowed;    /* "No entry" mouse cursor */
+    transform: none;        /* No bounce effect */
+    box-shadow: none;
+}
+
+.btn-edit:disabled:hover {
+    background-color: #ccc; /* Stay grey on hover */
+    transform: none;
+}

@@ -12,7 +12,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Extract input AND userContext (the user's local time string)
   const { input, userContext } = req.body || {};
   
   if (!input) {
@@ -20,33 +19,36 @@ export default async function handler(req, res) {
   }
 
   try {
-    // We use the user's local time string to ensure "tomorrow" is calculated based on THEIR timezone, not the server's.
     const referenceTime = userContext || new Date().toString();
 
     const prompt = `
-You are a calendar event parser. Parse the following natural language input into a structured event.
-
+You are a highly accurate date calculator. 
 User's Current Reference Time: "${referenceTime}"
 User Input: "${input}"
 
-Return ONLY a JSON object with this exact structure (no markdown, no explanations):
+Instructions:
+1. Parse the input into an ARRAY of events.
+2. RECURRENCE RULES:
+   - Be EXHAUSTIVE. If the user says "every Monday in December", you MUST find EVERY single Monday in that month.
+   - Check the FIRST week and the LAST week of the month carefully.
+   - Do not stop until you have covered the entire requested date range.
+3. If no specific range is given (e.g., just "every Monday"), assume the next 4 occurrences.
+4. Return ONLY a JSON object with this structure:
 {
-  "title": "event title",
-  "start": "YYYY-MM-DDTHH:mm:ss",
-  "end": "YYYY-MM-DDTHH:mm:ss",
-  "location": "location if mentioned, otherwise empty string",
-  "description": "any additional details, otherwise empty string"
+  "events": [
+    {
+      "title": "event title",
+      "start": "YYYY-MM-DDTHH:mm:ss", 
+      "end": "YYYY-MM-DDTHH:mm:ss",
+      "location": "location string",
+      "description": "description string"
+    }
+  ]
 }
 
-IMPORTANT Rules:
-1. Use the "User's Current Reference Time" to calculate relative dates (like "tomorrow", "next Friday", "in 2 hours").
-2. Return the "start" and "end" times as ISO 8601 strings WITHOUT timezone information (Floating Time). 
-   - CORRECT: "2025-11-30T16:00:00"
-   - INCORRECT: "2025-11-30T16:00:00Z" (Do not add 'Z')
-   - INCORRECT: "2025-11-30T16:00:00-05:00"
-3. If no specific time is given, use 9:00 AM (09:00:00) as default start.
-4. If no duration is given, default to 1 hour.
-5. Return only the JSON object.
+Rules:
+- Return times in ISO 8601 WITHOUT timezone (Floating Time). No 'Z' at the end.
+- Use 24-hour format for the time (e.g., 17:00:00).
 `;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -60,43 +62,35 @@ IMPORTANT Rules:
         messages: [
           {
             role: "system",
-            content:
-              "You are a helpful calendar assistant. You process dates based on the user's local time context. Always respond with valid JSON only.",
+            content: "You are a precise calendar assistant. You never miss a date in a sequence.",
           },
           {
             role: "user",
             content: prompt,
           },
         ],
-        temperature: 0.3,
-        max_tokens: 200,
+        temperature: 0.1, // Lower temperature = more strict/mathematical
+        max_tokens: 1500,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      return res
-        .status(response.status)
-        .json({ error: "OpenAI API error", details: errorData });
+      return res.status(response.status).json({ error: "OpenAI API error", details: errorData });
     }
 
     const data = await response.json();
-
     let content = data.choices[0].message.content.trim();
 
-    // Remove ```json or ``` wrappers if present
     if (content.startsWith("```")) {
       content = content.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
     }
 
-    const parsedEvent = JSON.parse(content);
-    return res.status(200).json(parsedEvent);
+    const parsedResult = JSON.parse(content);
+    return res.status(200).json(parsedResult);
+    
   } catch (err) {
     console.error("Server error:", err);
-    return res.status(500).json({
-      error: "Internal error",
-      details: err.message,
-    });
+    return res.status(500).json({ error: "Internal error", details: err.message });
   }
 }
-
