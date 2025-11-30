@@ -280,19 +280,28 @@ function renderDayView(container) {
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
             
+            // CHANGED: Use local methods (getHours/getMinutes)
             let startHour = eventStart.getHours();
             let startMinute = eventStart.getMinutes();
             let endHour = eventEnd.getHours();
             let endMinute = eventEnd.getMinutes();
             
+            // Check if event starts on a different day
+            // We compare purely based on local date strings to be safe and simple
             if (eventStart.toDateString() !== currentDate.toDateString()) {
-                startHour = 0;
-                startMinute = 0;
+                // If the event actually started on a previous day
+                if (eventStart < currentDate) {
+                    startHour = 0;
+                    startMinute = 0;
+                }
             }
             
             if (eventEnd.toDateString() !== currentDate.toDateString()) {
-                endHour = 23;
-                endMinute = 59;
+                // If the event ends on a future day
+                if (eventEnd > currentDate) {
+                     endHour = 23;
+                     endMinute = 59;
+                }
             }
             
             const topPercent = ((startHour * 60 + startMinute) / (24 * 60)) * 100;
@@ -524,17 +533,18 @@ function renderYearView(container) {
     container.innerHTML = html;
 }
 
-// Helper function to check if an event spans a specific day
+// Helper function to check if an event spans a specific day - USE UTC!
 function eventSpansDay(event, date) {
     const eventStart = new Date(event.start);
     const eventEnd = new Date(event.end);
     const checkDate = new Date(date);
     
-    eventStart.setHours(0, 0, 0, 0);
-    eventEnd.setHours(23, 59, 59, 999);
-    checkDate.setHours(0, 0, 0, 0);
+    // Normalize times to midnight for accurate date comparison
+    const startDay = new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate());
+    const endDay = new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+    const currentDay = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
     
-    return checkDate >= eventStart && checkDate <= eventEnd;
+    return currentDay.getTime() >= startDay.getTime() && currentDay.getTime() <= endDay.getTime();
 }
 
 // Helper function to check if two dates are the same day
@@ -557,13 +567,12 @@ function formatDate(date) {
 }
 
 function formatTime(date, format24h = use24HourFormat) {
+    // CHANGED: Use getHours/getMinutes instead of UTC
     if (format24h) {
-        // 24-hour format: "14:30"
         return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     } else {
-        // 12-hour format: "2:30 PM"
-        let hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, '0');
+        let hours = date.getHours(); // Local time
+        const minutes = String(date.getMinutes()).padStart(2, '0'); // Local time
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12 || 12;
         return `${hours}:${minutes} ${ampm}`;
@@ -632,7 +641,7 @@ function toggleInputMode() {
     }
 }
 
-// AI Event Parser with Vercel Backend - CORRECTED TIMEZONE FIX
+// AI Event Parser - NO TIMEZONE MANIPULATION
 async function addAIEvent() {
     const aiInput = document.getElementById('ai-event-input').value.trim();
     const aiTextarea = document.getElementById('ai-event-input');
@@ -650,37 +659,36 @@ async function addAIEvent() {
     aiButton.disabled = true;
     
     try {
-        const response = await fetch('https://ai-calendar-generator.vercel.app/api/parse-event', {
+        // GET USER'S ACTUAL LOCAL TIME (e.g., "Mon Dec 01 2025 15:00:00 GMT-0500")
+        const userNow = new Date().toString(); 
+
+        const response = await fetch('/api/parse-event', { // Note: use relative path if on same domain
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ input: aiInput })
+            // SEND LOCAL TIME TO BACKEND
+            body: JSON.stringify({ 
+                input: aiInput,
+                userContext: userNow 
+            })
         });
 
-        if (!response.ok) {
-            throw new Error(`Backend error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Backend error: ${response.status}`);
 
         const parsedEvent = await response.json();
         
-        // **CORRECTED FIX: Convert UTC to local time properly**
-        // The backend returns UTC time (e.g., "2025-12-01T16:00:00Z" for 11am EST)
-        // We need to SUBTRACT the timezone offset to get the correct local display time
-        let startDate = new Date(parsedEvent.start);
-        let endDate = new Date(parsedEvent.end);
-        
-        // Subtract timezone offset (getTimezoneOffset returns minutes, negative for EST)
-        // For EST (UTC-5), getTimezoneOffset() returns 300 (positive)
-        // We SUBTRACT this to convert UTC to local
-        startDate = new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000);
-        endDate = new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000);
+        // APPLY THE VALUES EXACTLY AS THE AI SENT THEM
+        // We strip the 'Z' just in case the AI adds it out of habit, 
+        // ensuring we use the exact numbers (Floating Time).
+        const cleanStart = parsedEvent.start.replace('Z', '');
+        const cleanEnd = parsedEvent.end.replace('Z', '');
 
         const event = {
             id: Date.now(),
             title: parsedEvent.title,
-            start: startDate,
-            end: endDate,
+            start: new Date(cleanStart), 
+            end: new Date(cleanEnd),
             location: parsedEvent.location || '',
             description: parsedEvent.description || ''
         };
@@ -688,9 +696,6 @@ async function addAIEvent() {
         events.push(event);
         updateEventsList();
         renderCalendar();
-        
-        aiTextarea.value = '';
-        toggleAddEvent();
         
     } catch (error) {
         console.error('AI parsing error:', error);

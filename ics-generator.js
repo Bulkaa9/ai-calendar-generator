@@ -9,7 +9,7 @@ function generateICS(events) {
     lines.push('CALSCALE:GREGORIAN');
     lines.push('METHOD:PUBLISH');
     lines.push('X-WR-CALNAME:My Calendar');
-    lines.push('X-WR-TIMEZONE:UTC');
+    // Removed X-WR-TIMEZONE to allow for floating time
     
     // Add each event
     events.forEach(event => {
@@ -52,18 +52,20 @@ function generateICS(events) {
     return lines.join('\r\n');
 }
 
-// Format date for ICS format (YYYYMMDDTHHMMSSZ)
+// Format date for ICS format (YYYYMMDDTHHMMSS) - Floating Time
 function formatICSDate(date) {
     const pad = (n) => String(n).padStart(2, '0');
     
-    const year = date.getUTCFullYear();
-    const month = pad(date.getUTCMonth() + 1);
-    const day = pad(date.getUTCDate());
-    const hours = pad(date.getUTCHours());
-    const minutes = pad(date.getUTCMinutes());
-    const seconds = pad(date.getUTCSeconds());
+    // CHANGED: Use Local Time methods instead of UTC
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
     
-    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+    // CHANGED: Removed 'Z' at the end to strictly follow Floating Time
+    return `${year}${month}${day}T${hours}${minutes}${seconds}`;
 }
 
 // Escape special characters for ICS format
