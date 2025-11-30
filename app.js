@@ -297,11 +297,13 @@ function renderDayView(container) {
     });
     
     let html = '<div class="calendar-day-view">';
+    // Header
     html += `<div class="day-view-header">${currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>`;
     
-    // Time grid (24 hours)
+    // OPEN TIMELINE CONTAINER (This is the relative parent)
     html += '<div class="day-view-timeline">';
     
+    // 1. Render Grid Lines
     for (let hour = 0; hour < 24; hour++) {
         html += '<div class="timeline-hour">';
         html += `<div class="timeline-label">${formatHourLabel(hour)}</div>`;
@@ -309,9 +311,7 @@ function renderDayView(container) {
         html += '</div>';
     }
     
-    html += '</div>';
-    
-    // Overlay events on timeline
+    // 2. Render Events INSIDE the timeline container
     if (dayEvents.length > 0) {
         const eventLayout = calculateEventLayout(dayEvents, currentDate);
         
@@ -337,24 +337,25 @@ function renderDayView(container) {
                 if (eventEnd > currentDate) { endHour = 23; endMinute = 59; }
             }
             
-            const topPercent = ((startHour * 60 + startMinute) / (24 * 60)) * 100;
+            // PIXEL MATH
+            const startTotalMinutes = (startHour * 60) + startMinute;
+            const endTotalMinutes = (endHour * 60) + endMinute;
+            const durationMinutes = endTotalMinutes - startTotalMinutes;
             
-            // Calculate Duration in Minutes
-            const durationMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
-            
-            const heightPercent = (durationMinutes / (24 * 60)) * 100;
+            const topPx = startTotalMinutes;
+            const heightPx = durationMinutes;
+
             const widthPercent = (100 / totalColumns) - 1;
             const leftPercent = (column / totalColumns) * 100;
             
-            // Logic: Only show note if duration >= 150 minutes (2h 30m) AND description exists
             const showNote = event.description && durationMinutes >= 150;
             
             html += `
                 <div class="day-event-overlay" 
                     onclick="openEventModal(${event.id}); event.stopPropagation();"
                     style="
-                    top: ${topPercent}%; 
-                    height: ${heightPercent}%; 
+                    top: calc(${topPx}px + 1px); 
+                    height: calc(${heightPx}px - 2px); 
                     left: ${leftPercent}%;
                     width: ${widthPercent}%;
                     background: ${color.bg};
@@ -368,10 +369,10 @@ function renderDayView(container) {
                 </div>
             `;
         });
-        html += '</div>';
+        html += '</div>'; // Close Overlay
     }
     
-    html += '</div>';
+    html += '</div>'; // CLOSE TIMELINE CONTAINER (Moved to here)
     container.innerHTML = html;
 }
 
@@ -424,18 +425,30 @@ function renderWeekView(container) {
     const weekStart = new Date(currentDate);
     weekStart.setDate(currentDate.getDate() - currentDate.getDay());
     
+    // Create a reference for "Today" to compare against
+    const today = new Date();
+    
     let html = '<div class="calendar-week">';
     
     for (let i = 0; i < 7; i++) {
         const date = new Date(weekStart);
         date.setDate(date.getDate() + i);
         
+        // CHECK: Is this date today?
+        const isToday = isSameDay(date, today);
+        
+        // If it is today, add the 'today' class
+        let className = 'week-day';
+        if (isToday) {
+            className += ' today';
+        }
+        
         const dayEvents = events.filter(event => {
             return eventSpansDay(event, date);
         });
         
         html += `
-            <div class="week-day" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()}))">
+            <div class="${className}" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()}))">
                 <div class="week-day-header">
                     ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                 </div>
@@ -443,7 +456,6 @@ function renderWeekView(container) {
                     ${dayEvents.length === 0 ? '<span style="color: #999;">No events</span>' : ''}
                     ${dayEvents.map(event => {
                         const color = getEventColor(event.id);
-                        // ADDED ONCLICK HERE
                         return `
                             <div class="week-event-item" 
                                  onclick="openEventModal(${event.id}); event.stopPropagation();"
@@ -484,27 +496,33 @@ function renderMonthView(container) {
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);
         
-        const isToday = date.getTime() === today.getTime();
-        const isOtherMonth = date.getMonth() !== month;
+        const isToday = isSameDay(date, today);
+        let classes = 'calendar-day';
+        if (isToday) classes += ' today';
+        if (date.getMonth() !== month) classes += ' other-month';
         
         const dayEvents = events.filter(event => {
             return eventSpansDay(event, date);
         });
         
-        let classes = 'calendar-day';
-        if (isToday) classes += ' today';
-        if (isOtherMonth) classes += ' other-month';
+        // Sort events by time so they appear in order
+        dayEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
         
         html += `<div class="${classes}" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()}))">`;
         html += `<div class="calendar-day-number">${date.getDate()}</div>`;
         
-        // --- NEW LOGIC FOR EVENTS ---
         if (dayEvents.length > 0) {
             html += '<div class="calendar-day-events">';
             
-            // CASE 1: Only 1 Event -> Show the Text Chip
-            if (dayEvents.length === 1) {
-                const event = dayEvents[0];
+            // LOGIC: 
+            // If 1 or 2 events -> Show all of them as chips.
+            // If 3+ events -> Show first 2 as chips, then the "..." bar.
+            
+            const limit = dayEvents.length >= 3 ? 2 : dayEvents.length;
+            
+            // 1. Render the chips (up to 2)
+            for (let j = 0; j < limit; j++) {
+                const event = dayEvents[j];
                 const isMultiDay = !isSameDay(event.start, event.end);
                 const isFirstDay = isSameDay(event.start, date);
                 const isLastDay = isSameDay(event.end, date);
@@ -516,28 +534,12 @@ function renderMonthView(container) {
                     else chipClass += ' multi-day-middle';
                 }
                 
-                html += `<div class="${chipClass}" onclick="openEventModal(${event.id}); event.stopPropagation();">${escapeHtml(event.title)}</div>`;
-            } 
-            // CASE 2: More than 1 Event -> Show Thin Lines
-            else {
-                // Determine how many lines to show
-                const maxLines = 3; // Show up to 3 lines
-                const hasMore = dayEvents.length > maxLines;
-                const limit = hasMore ? maxLines : dayEvents.length;
-                
-                // Sort events by time
-                const sortedDayEvents = [...dayEvents].sort((a, b) => new Date(a.start) - new Date(b.start));
-
-                for (let j = 0; j < limit; j++) {
-                    const event = sortedDayEvents[j];
-                    // Render thin line
-                    html += `<div class="calendar-event-line" title="${escapeHtml(event.title)}" onclick="openEventModal(${event.id}); event.stopPropagation();"></div>`;
-                }
-                
-                // If more than 3, show the grey bar
-                if (hasMore) {
-                    html += `<div class="calendar-event-more-small" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()})); event.stopPropagation();"></div>`;
-                }
+                html += `<div class="${chipClass}" title="${escapeHtml(event.title)}" onclick="openEventModal(${event.id}); event.stopPropagation();">${escapeHtml(event.title)}</div>`;
+            }
+            
+            // 2. Render the "..." bar if needed
+            if (dayEvents.length >= 3) {
+                html += `<div class="calendar-event-more-bar" onclick="goToDate(new Date(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()})); event.stopPropagation();">...</div>`;
             }
             
             html += '</div>';

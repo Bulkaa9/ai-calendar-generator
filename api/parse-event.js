@@ -22,18 +22,28 @@ export default async function handler(req, res) {
     const referenceTime = userContext || new Date().toString();
 
     const prompt = `
-You are a highly accurate date calculator. 
+You are a precise calendar assistant.
 User's Current Reference Time: "${referenceTime}"
 User Input: "${input}"
 
 Instructions:
 1. Parse the input into an ARRAY of events.
-2. RECURRENCE RULES:
-   - Be EXHAUSTIVE. If the user says "every Monday in December", you MUST find EVERY single Monday in that month.
-   - Check the FIRST week and the LAST week of the month carefully.
-   - Do not stop until you have covered the entire requested date range.
-3. If no specific range is given (e.g., just "every Monday"), assume the next 4 occurrences.
-4. Return ONLY a JSON object with this structure:
+
+2. **CRITICAL TIME RULE (FUTURE BIAS):**
+   - You must ALWAYS generate dates in the FUTURE relative to the "User's Current Reference Time".
+   - If the user mentions a month (e.g., "January") that has already passed in the current year, you MUST assume the NEXT year.
+
+3. **DATE RANGE RULES (Inclusive):**
+   - If the user says "from [Month A] to [Month B]", you must include ALL dates in [Month A] AND ALL dates in [Month B] (until the very last day of Month B).
+   - Example: "January to March" means "Jan 1st through March 31st".
+   - Do not stop at the beginning of the end month.
+
+4. **RECURRENCE RULES:**
+   - Be EXHAUSTIVE. Find every occurrence in the requested range.
+   - If no specific end date is given (e.g. just "every Monday"), assume the next 4 occurrences.
+   - DECISION LOGIC: Only create multiple events if keywords like "every", "weekly", "daily", "recurring" are present. Otherwise, create 1 event.
+
+5. RETURN FORMAT (JSON Only):
 {
   "events": [
     {
@@ -47,8 +57,8 @@ Instructions:
 }
 
 Rules:
-- Return times in ISO 8601 WITHOUT timezone (Floating Time). No 'Z' at the end.
-- Use 24-hour format for the time (e.g., 17:00:00).
+- Return times in ISO 8601 WITHOUT timezone (Floating Time).
+- Use 24-hour format.
 `;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -62,15 +72,15 @@ Rules:
         messages: [
           {
             role: "system",
-            content: "You are a precise calendar assistant. You never miss a date in a sequence.",
+            content: "You are a logical calendar assistant. You treat date ranges as fully inclusive.",
           },
           {
             role: "user",
             content: prompt,
           },
         ],
-        temperature: 0.1, // Lower temperature = more strict/mathematical
-        max_tokens: 1500,
+        temperature: 0.1,
+        max_tokens: 2000, // Increased to ensure it can fit 3+ months of weekly events
       }),
     });
 

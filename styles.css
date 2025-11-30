@@ -11,6 +11,7 @@ body {
     min-height: 100vh;
     padding: 20px;
     line-height: 1.6;
+    zoom: 0.80; /* Your preferred zoom level */
 }
 
 .container {
@@ -207,6 +208,19 @@ h3 {
 .btn-delete:hover {
     background: #d32f2f;
     transform: translateY(-1px);
+}
+
+/* Disabled Edit Button */
+.btn-edit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-edit:disabled:hover {
+    background-color: #ccc;
+    transform: none;
 }
 
 /* Add Event Trigger Button */
@@ -542,17 +556,21 @@ button:disabled {
     opacity: 0.3;
 }
 
+/* Month View Today Style */
 .calendar-day.today {
-    border: 2px solid rgb(24, 52, 85);
-    background: rgb(24, 52, 85);
-    color: white;
+    border: 2px solid rgb(73, 148, 236); /* Light Blue Border */
+    background: white;                   /* White Background */
+    color: inherit;                      /* Default text color */
+    position: relative;
+    z-index: 2;
 }
 
 .calendar-day.today .calendar-day-number {
-    color: white;
+    color: rgb(73, 148, 236); /* Number becomes Light Blue */
+    font-weight: 800;
 }
 
-/* UPDATED: Month View Events Container */
+/* Month View Events Container */
 .calendar-day-events {
     display: flex;
     flex-direction: column;
@@ -568,7 +586,7 @@ button:disabled {
 .calendar-event-chip {
     background: rgb(24, 52, 85);
     color: white;
-    padding: 3px 6px;
+    padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.75em;
     white-space: nowrap;
@@ -577,14 +595,18 @@ button:disabled {
     font-weight: 500;
     border: none;
     margin-bottom: 0;
+    height: 20px;
+    line-height: 16px;
+    cursor: pointer;
 }
 
+/* Chips inside 'today' stay Dark Blue */
 .calendar-day.today .calendar-event-chip {
-    background: white;
-    color: rgb(24, 52, 85);
+    background: rgb(24, 52, 85);
+    color: white;
 }
 
-/* NEW: Thin Line (for multiple events) */
+/* Thin Line (for multiple events) */
 .calendar-event-line {
     height: 6px;
     background: rgb(24, 52, 85);
@@ -598,30 +620,23 @@ button:disabled {
     background: rgb(32, 72, 120);
 }
 
-/* NEW: Small More Indicator */
-.calendar-event-more-small {
-    height: 6px;
+/* The "..." Grey Bar */
+.calendar-event-more-bar {
     background: #e0e0e0;
-    border-radius: 3px;
-    font-size: 0;
+    color: black;
+    height: 14px;
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 8px; /* Centers the dots vertically */
+    text-align: center;
+    font-weight: 800;
     cursor: pointer;
     margin-top: 1px;
+    transition: background 0.2s;
 }
 
-.calendar-event-more-small:hover {
+.calendar-event-more-bar:hover {
     background: #ccc;
-}
-
-/* Legacy More Indicator (Backup) */
-.calendar-event-more {
-    color: rgb(24, 52, 85);
-    font-size: 0.75em;
-    font-weight: 700;
-    padding: 2px 6px;
-    text-align: center;
-    background: rgba(24, 52, 85, 0.1);
-    border-radius: 4px;
-    margin-top: 2px;
 }
 
 /* Multi-day event styling */
@@ -680,6 +695,17 @@ button:disabled {
     transform: translateX(4px);
 }
 
+/* Week View Today Style */
+.week-day.today {
+    border: 2px solid rgb(73, 148, 236) !important;
+    background: #f8fbff;
+}
+
+.week-day.today .week-day-header {
+    color: rgb(73, 148, 236);
+    font-weight: 700;
+}
+
 .week-day-header {
     font-weight: 600;
     color: #333;
@@ -730,18 +756,23 @@ button:disabled {
     border: 2px solid #e0e0e0;
     border-radius: 12px;
     background: white;
-    /* Force exact height: 24 hours * 60px = 1440px */
-    height: 1440px; 
-    overflow: hidden; /* Ensures nothing spills out */
+    height: 1440px; /* 24 * 60px = 1440px EXACTLY */
+    overflow: hidden;
 }
 
 .timeline-hour {
     display: grid;
     grid-template-columns: 100px 1fr;
     border-bottom: 1px solid #f0f0f0;
-    /* Force exact height per hour */
-    height: 60px; 
-    box-sizing: border-box; /* Includes the border in the 60px calculation */   
+    
+    /* FORCE EXACT HEIGHT */
+    height: 60px !important; 
+    min-height: 60px !important;
+    max-height: 60px !important;
+    
+    /* Prevent text expansion */
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .timeline-hour:last-child {
@@ -758,6 +789,7 @@ button:disabled {
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    height: 100%; /* Fill the 60px exactly */
 }
 
 .timeline-slot {
@@ -888,9 +920,10 @@ button:disabled {
 }
 
 .year-day.has-events {
-    background: rgb(73, 148, 236);
+    background: rgb(24, 52, 85); /* Dark Blue */
     color: white;
     font-weight: 600;
+    box-shadow: 0 2px 4px rgba(24, 52, 85, 0.2);
 }
 
 .year-day.today {
@@ -1298,17 +1331,4 @@ button:disabled {
 .btn-edit-large:hover, .btn-delete-large:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Disabled Edit Button */
-.btn-edit:disabled {
-    background-color: #ccc; /* Grey */
-    cursor: not-allowed;    /* "No entry" mouse cursor */
-    transform: none;        /* No bounce effect */
-    box-shadow: none;
-}
-
-.btn-edit:disabled:hover {
-    background-color: #ccc; /* Stay grey on hover */
-    transform: none;
 }
