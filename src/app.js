@@ -8,6 +8,7 @@ import {
 import { describeRecurrence, escapeHtml, formatCalendarDate, formatIsoDate, formatReminders, formatTime, formatWhen } from './format.js';
 import { generateICS } from './ics.js';
 import { eventStartDate, expandEvent, occurrenceOn } from './recurrence.js';
+import { initSidebarResize } from './resize.js';
 import {
     addDays, addMonths, dayKeyOf, formatTime24, formatWallTime, fromDayKey, getBrowserTimeZone, getWallTime,
     isValidTimeZone, parseIsoDate, toDayKey, todayIn, toIsoDate, wallTimeToDate
@@ -254,7 +255,7 @@ function renderCalendar() {
     const ctx = { items, cursor: state.cursor, timeZone: state.timeZone, use24Hour: state.use24Hour, todayKey, now: new Date() };
     const previousScroll = container.querySelector('[data-scroll]')?.scrollTop;
 
-    $('current-period').textContent = periodTitle();
+    renderPeriodTitle();
     if (state.view === 'day' || state.view === 'week') {
         const days = state.view === 'day' ? [state.cursor] : Array.from({ length: 7 }, (_, i) => addDays(weekStart(state.cursor), i));
         container.innerHTML = renderTimeGrid(ctx, days);
@@ -285,21 +286,41 @@ function restoreScroll(container, days, todayKey, previousScroll) {
     scroller.scrollTop = Math.max(0, (minutes / (24 * 60)) * scroller.scrollHeight - 12);
 }
 
-// e.g. "October 2026", "Oct 18 – 24, 2026", "Monday, October 19, 2026"
-function periodTitle() {
+// Long and short forms of the period title, e.g. "Monday, October 19, 2026" / "Mon, Oct 19, 2026";
+// CSS shows the short one when the top bar runs out of room
+function periodTitles() {
     const { view, cursor } = state;
-    if (view === 'day') return formatCalendarDate(cursor, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    if (view === 'month') return formatCalendarDate(cursor, { month: 'long', year: 'numeric' });
-    if (view === 'year') return String(cursor.year);
+    if (view === 'day') {
+        return {
+            long: formatCalendarDate(cursor, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+            short: formatCalendarDate(cursor, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+        };
+    }
+    if (view === 'month') {
+        return {
+            long: formatCalendarDate(cursor, { month: 'long', year: 'numeric' }),
+            short: formatCalendarDate(cursor, { month: 'short', year: 'numeric' })
+        };
+    }
+    if (view === 'year') return { long: String(cursor.year), short: String(cursor.year) };
 
+    // Week, e.g. "Oct 18 – 24, 2026" or "Dec 27, 2026 – Jan 2, 2027"
     const first = weekStart(cursor);
     const last = addDays(first, 6);
     const short = { month: 'short', day: 'numeric' };
+    let title;
     if (first.year !== last.year) {
-        return `${formatCalendarDate(first, { ...short, year: 'numeric' })} – ${formatCalendarDate(last, { ...short, year: 'numeric' })}`;
+        title = `${formatCalendarDate(first, { ...short, year: 'numeric' })} – ${formatCalendarDate(last, { ...short, year: 'numeric' })}`;
+    } else {
+        const end = first.month === last.month ? String(last.day) : formatCalendarDate(last, short);
+        title = `${formatCalendarDate(first, short)} – ${end}, ${last.year}`;
     }
-    const end = first.month === last.month ? String(last.day) : formatCalendarDate(last, short);
-    return `${formatCalendarDate(first, short)} – ${end}, ${last.year}`;
+    return { long: title, short: title };
+}
+
+function renderPeriodTitle() {
+    const { long, short } = periodTitles();
+    $('current-period').innerHTML = `<span class="title-long">${escapeHtml(long)}</span><span class="title-short">${escapeHtml(short)}</span>`;
 }
 
 // Keeps the "now" line in place, and redraws when the day changes
@@ -907,6 +928,7 @@ function init() {
     $('modal-delete-btn').addEventListener('click', deleteFromModal);
 
     document.addEventListener('keydown', handleShortcut);
+    initSidebarResize({ root: $('app'), layout: document.querySelector('.layout'), sidebar: $('sidebar'), handle: $('sidebar-resize') });
 
     populateTimeZones();
     render();

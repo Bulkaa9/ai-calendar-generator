@@ -31,6 +31,7 @@ Then, to change what's there:
 - **Clash warnings** when a new or changed event overlaps another timed event.
 - **Time zones**: the calendar shows events in the zone you pick (your browser's by default). Events can have their own zone ("9am Tokyo time"), and recurring events keep their local time across daylight saving changes.
 - **Views**: a day and week time grid, plus month and year views, with 12h or 24h times. A mini month in the sidebar jumps to any date, and clicking an empty time slot starts a new event there.
+- **Resizable sidebar**: drag the divider between the sidebar and the calendar (or focus it and use the arrow keys; double-click resets it). The sidebar is at least 300px wide, and the calendar always keeps at least two thirds of the width. The chosen width is remembered in your browser.
 - **Undo**: deleting events and applying AI results can be undone from the message at the bottom of the screen.
 - **Keyboard shortcuts**: `c` create, `t` today, `d` / `w` / `m` / `y` change view, `j` / `k` (or `n` / `p`) next / previous, `Esc` closes dialogs, `Ctrl`/`Cmd` + `Enter` in the Ask AI box adds events.
 - **Export**: a standard iCalendar file with `RRULE`, `EXDATE`, `RECURRENCE-ID`, `VALARM` and full `VTIMEZONE` definitions.
@@ -158,3 +159,7 @@ Input is limited to 1000 characters, and each IP gets 20 requests per 10 minutes
 - Recurrence covers the patterns listed above, not every RRULE (for example, "every 2nd and 4th Tuesday in spring" won't work). Rules the editor can't show as fields are kept as they are and shown as "Custom".
 - Clashes are only checked between timed events; all-day events never clash.
 - Reminders on all-day events count back from midnight at the start of the day.
+
+---
+
+*Created by [Bulkaa9](https://github.com/Bulkaa9), helped by Claude.*

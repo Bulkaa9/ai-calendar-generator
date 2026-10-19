@@ -415,13 +415,15 @@ select {
     display: none;
 }
 
+/* Only as wide as its content, leaving the room to the date navigation */
 .brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    width: calc(var(--sidebar-width) - 28px);
+    padding-right: 16px;
     font-size: 20px;
     color: var(--text-2);
+    white-space: nowrap;
     flex-shrink: 0;
 }
 
@@ -435,6 +437,22 @@ select {
     gap: 4px;
     min-width: 0;
     flex: 1;
+    container-type: inline-size;
+}
+
+/* The period title has a long and a short form; the short one is used when space runs out */
+.title-short {
+    display: none;
+}
+
+@container (max-width: 470px) {
+    .title-long {
+        display: none;
+    }
+
+    .title-short {
+        display: inline;
+    }
 }
 
 .topbar-nav .btn-outline {
@@ -809,6 +827,45 @@ select {
 
 .sidebar-scrim {
     display: none;
+}
+
+/* Divider between the sidebar and the calendar */
+.resize-handle {
+    position: relative;
+    width: 12px;
+    margin-left: -6px;
+    flex-shrink: 0;
+    cursor: col-resize;
+    touch-action: none;
+}
+
+.resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    bottom: 16px;
+    left: 5px;
+    width: 2px;
+    border-radius: 1px;
+    background: transparent;
+    transition: background-color 0.15s;
+}
+
+.resize-handle:hover::after,
+.resize-handle:focus-visible::after,
+.resizing .resize-handle::after {
+    background: var(--blue);
+}
+
+.resize-handle:focus-visible {
+    outline: none;
+}
+
+/* While dragging: no text selection, and the resize cursor everywhere */
+.resizing,
+.resizing * {
+    cursor: col-resize !important;
+    user-select: none !important;
 }
 
 /* ==========================================================================
@@ -1682,7 +1739,7 @@ select {
 
 @media (max-width: 1100px) {
     .brand {
-        width: auto;
+        padding-right: 4px;
     }
 
     .brand span {
@@ -1693,6 +1750,11 @@ select {
 @media (max-width: 900px) {
     .sidebar-toggle {
         display: inline-grid;
+    }
+
+    /* The sidebar is a drawer here, so there is nothing to resize */
+    .resize-handle {
+        display: none;
     }
 
     .sidebar {
