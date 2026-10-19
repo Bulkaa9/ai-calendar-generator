@@ -879,7 +879,8 @@ select {
     flex-direction: column;
     flex: 1;
     min-width: 0;
-    margin: 0 16px 16px 0;
+    /* Space below the top bar, so the two borders don't touch */
+    margin: 16px 16px 16px 0;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -1784,7 +1785,7 @@ select {
     }
 
     .calendar {
-        margin: 0 8px 8px;
+        margin: 8px;
     }
 }
 

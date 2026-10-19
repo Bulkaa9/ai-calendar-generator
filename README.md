@@ -44,7 +44,7 @@ The interface follows Google Calendar's conventions. It is mostly white and grey
 - Event colours are picked from six shades of these three. Every colour pair passes WCAG AA contrast.
 - The blue → purple → pink gradient is reserved for the logo, the Ask AI card and the Create button.
 
-All icons and illustrations are custom SVGs; the app uses no emoji or image icons. Text uses Roboto. On screens narrower than 900px the sidebar becomes a slide-out drawer, and on phones dialogs open from the bottom.
+All icons and illustrations are custom SVGs; the app uses no emoji or image icons. The tab icon (blue, purple and pink waves with a white C) comes as `images/favicon.svg`, PNG copies for Safari and the iOS home screen, and `favicon.ico` for browsers that request it. Text uses Roboto. On screens narrower than 900px the sidebar becomes a slide-out drawer, and on phones dialogs open from the bottom.
 
 ## How it works
 

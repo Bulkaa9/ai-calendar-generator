@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <clipPath id="tile">
+      <rect width="64" height="64" rx="15"/>
+    </clipPath>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6bf0"/>
+      <stop offset="1" stop-color="#1a56db"/>
+    </linearGradient>
+    <linearGradient id="wave-purple" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#6d3fe0"/>
+    </linearGradient>
+    <linearGradient id="wave-pink" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c8326e"/>
+      <stop offset="1" stop-color="#e5578f"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <!-- Blue sky -->
+    <rect width="64" height="64" fill="url(#sky)"/>
+    <!-- Purple wave -->
+    <path d="M0 24c9-7 18-7 27 0s18 7 27 0c4-3 7-4 10-4v44H0z" fill="url(#wave-purple)"/>
+    <!-- Pink wave -->
+    <path d="M0 44c8-6 16-6 24 0s16 6 24 0c6-4 11-5 16-3v23H0z" fill="url(#wave-pink)"/>
+    <!-- Light crests between the colours -->
+    <path d="M0 24c9-7 18-7 27 0s18 7 27 0c4-3 7-4 10-4" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.5"/>
+    <path d="M0 44c8-6 16-6 24 0s16 6 24 0c6-4 11-5 16-3" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.5"/>
+  </g>
+
+  <!-- The C: a soft shadow, then the white letter -->
+  <path d="M42.6 21.4A15 15 0 1 0 42.6 42.6" fill="none" stroke="#1f1f1f" stroke-opacity="0.18" stroke-width="8.5" stroke-linecap="round" transform="translate(0 1.2)"/>
+  <path d="M42.6 21.4A15 15 0 1 0 42.6 42.6" fill="none" stroke="#ffffff" stroke-width="8.5" stroke-linecap="round"/>
+</svg>
