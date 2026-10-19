@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130" width="200" height="130">
+  <defs>
+    <linearGradient id="review-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a56db"/>
+      <stop offset="0.55" stop-color="#6d3fe0"/>
+      <stop offset="1" stop-color="#c8326e"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="100" cy="120" rx="64" ry="6" fill="#eef0f3"/>
+
+  <!-- Stacked cards, all cleared -->
+  <rect x="52" y="22" width="96" height="30" rx="10" fill="#f1f3f4"/>
+  <rect x="44" y="40" width="112" height="34" rx="10" fill="#f8f9fa" stroke="#e3e5e8" stroke-width="2"/>
+  <rect x="36" y="62" width="128" height="44" rx="12" fill="#ffffff" stroke="#e3e5e8" stroke-width="2"/>
+  <rect x="50" y="76" width="56" height="8" rx="4" fill="#e8eaed"/>
+  <rect x="50" y="90" width="36" height="6" rx="3" fill="#f1f3f4"/>
+
+  <!-- Check badge -->
+  <circle cx="142" cy="84" r="16" fill="url(#review-gradient)"/>
+  <path d="M134.5 84.5l5 5 9.5-10" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M170 26c.8 4.2 1.9 5.3 6.1 6.1-4.2.8-5.3 1.9-6.1 6.1-.8-4.2-1.9-5.3-6.1-6.1 4.2-.8 5.3-1.9 6.1-6.1z" fill="url(#review-gradient)"/>
+  <circle cx="28" cy="40" r="3.5" fill="#c8326e" opacity="0.45"/>
+</svg>

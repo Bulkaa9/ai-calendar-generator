@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a56db"/>
+      <stop offset="0.55" stop-color="#6d3fe0"/>
+      <stop offset="1" stop-color="#c8326e"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="url(#logo-gradient)"/>
+  <!-- Calendar page -->
+  <rect x="10" y="12" width="28" height="26" rx="5" fill="#ffffff"/>
+  <rect x="10" y="19" width="28" height="1.5" fill="#e3e5e8"/>
+  <rect x="16" y="8.5" width="3.5" height="7.5" rx="1.75" fill="#ffffff"/>
+  <rect x="28.5" y="8.5" width="3.5" height="7.5" rx="1.75" fill="#ffffff"/>
+  <!-- Sparkle -->
+  <path d="M24 22.5c.75 3.9 1.85 5 5.75 5.75-3.9.75-5 1.85-5.75 5.75-.75-3.9-1.85-5-5.75-5.75 3.9-.75 5-1.85 5.75-5.75z" fill="url(#logo-gradient)"/>
+</svg>

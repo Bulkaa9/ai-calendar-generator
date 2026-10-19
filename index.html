@@ -3,165 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Calendar Generator</title>
+    <title>AI Calendar</title>
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script type="module" src="src/app.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <h1>AI Calendar Generator</h1>
-            <p>Turn natural language into calendar events</p>
+    <!-- Icon set: 24x24 line icons, used with <svg class="icon"><use href="#icon-name"></use></svg> -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="accent-gradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#1a56db"/>
+                <stop offset="0.55" stop-color="#6d3fe0"/>
+                <stop offset="1" stop-color="#c8326e"/>
+            </linearGradient>
+        </defs>
+        <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+        <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+        <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+        <symbol id="icon-sparkle" viewBox="0 0 24 24"><path fill="url(#accent-gradient)" stroke="none" d="M11 3c.9 4.7 2.3 6.1 7 7-4.7.9-6.1 2.3-7 7-.9-4.7-2.3-6.1-7-7 4.7-.9 6.1-2.3 7-7zM19 14.5c.35 1.85 .9 2.4 2.75 2.75-1.85.35-2.4.9-2.75 2.75-.35-1.85-.9-2.4-2.75-2.75 1.85-.35 2.4-.9 2.75-2.75z"/></symbol>
+        <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-3-3L5 17v3zM13.5 8.5l2 2"/></symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 11v6M14.5 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4.5h6V7"/></symbol>
+        <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+        <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 0 1 13 0c0 5.2-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+        <symbol id="icon-repeat" viewBox="0 0 24 24"><path d="M17 3.5l3 3-3 3M4.5 11.5V10a3.5 3.5 0 0 1 3.5-3.5h12M7 20.5l-3-3 3-3M19.5 12.5V14a3.5 3.5 0 0 1-3.5 3.5H4"/></symbol>
+        <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M6.5 16v-5a5.5 5.5 0 0 1 11 0v5l1.5 2h-14zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+        <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/></symbol>
+        <symbol id="icon-notes" viewBox="0 0 24 24"><path d="M5 6.5h14M5 10.5h14M5 14.5h10M5 18.5h7"/></symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+        <symbol id="icon-warning" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3zM12 10v4.5M12 17.2v.1"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    </svg>
+
+    <div class="app" id="app">
+        <header class="topbar">
+            <button type="button" class="icon-btn sidebar-toggle" id="sidebar-toggle" aria-label="Show menu" aria-expanded="false" aria-controls="sidebar">
+                <svg class="icon"><use href="#icon-menu"></use></svg>
+            </button>
+            <div class="brand">
+                <img src="images/logo.svg" alt="" width="32" height="32">
+                <span>AI Calendar</span>
+            </div>
+            <div class="topbar-nav">
+                <button type="button" class="btn btn-outline" id="today-btn">Today</button>
+                <button type="button" class="icon-btn" id="prev-btn" aria-label="Previous">
+                    <svg class="icon"><use href="#icon-chevron-left"></use></svg>
+                </button>
+                <button type="button" class="icon-btn" id="next-btn" aria-label="Next">
+                    <svg class="icon"><use href="#icon-chevron-right"></use></svg>
+                </button>
+                <h1 class="period-title" id="current-period"></h1>
+            </div>
+            <div class="topbar-actions">
+                <div class="segmented" role="group" aria-label="Calendar view">
+                    <button type="button" data-view="day">Day</button>
+                    <button type="button" data-view="week">Week</button>
+                    <button type="button" data-view="month" class="active">Month</button>
+                    <button type="button" data-view="year">Year</button>
+                </div>
+                <button type="button" class="btn btn-primary" id="download-btn" disabled>
+                    <svg class="icon"><use href="#icon-download"></use></svg>
+                    <span>Export</span>
+                </button>
+            </div>
         </header>
 
-        <div class="main-layout">
-            <!-- Left Column: Events & Add Button -->
-            <div class="left-column">
-                <!-- Events List Section -->
-                <section class="events-section">
-                    <div class="section-header">
-                        <h2>Your Events (<span id="event-count">0</span>)</h2>
-                        <button onclick="downloadCalendar()" id="download-btn" class="btn-download-small" disabled>
-                            <img src="images/image.jpg" alt="Download" class="download-icon" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;">
-                            Download
-                        </button>
+        <div class="layout">
+            <aside class="sidebar" id="sidebar">
+                <button type="button" class="create-btn" id="create-btn">
+                    <svg class="icon"><use href="#icon-plus"></use></svg>
+                    Create
+                </button>
+
+                <section class="ai-card" aria-labelledby="ai-card-title">
+                    <div class="ai-card-header">
+                        <svg class="icon"><use href="#icon-sparkle"></use></svg>
+                        <h2 id="ai-card-title">Ask AI</h2>
                     </div>
-                    
-                    <div id="events-list" class="events-list">
-                        <p class="empty-state">No events yet. Click "+ Add Event" below! 👇</p>
+                    <label class="visually-hidden" for="ai-event-input">Describe events to add, or changes to make</label>
+                    <textarea id="ai-event-input" rows="3" maxlength="1000" placeholder="Gym every Monday at 7pm&#10;Move the gym to 8pm"></textarea>
+                    <div class="ai-actions">
+                        <button type="button" id="ai-submit-btn" class="btn btn-primary">Add events</button>
+                        <button type="button" id="ai-change-btn" class="btn btn-tonal" disabled>Change events</button>
                     </div>
                 </section>
 
-                <!-- Add Event Button (Collapsed) -->
-                <div class="add-event-trigger" onclick="toggleAddEvent()" id="add-trigger">
-                    <div class="add-icon">+</div>
-                    <span>Add Event</span>
+                <section class="mini-month" id="mini-month" aria-label="Month overview"></section>
+
+                <section class="events-panel" aria-labelledby="events-title">
+                    <div class="panel-header">
+                        <h2 id="events-title">Your events</h2>
+                        <span class="count-badge" id="event-count">0</span>
+                    </div>
+                    <div id="events-list" class="events-list"></div>
+                </section>
+
+                <section class="settings" aria-label="Settings">
+                    <label for="timezone-select">Time zone</label>
+                    <select id="timezone-select"></select>
+                    <label class="switch">
+                        <input type="checkbox" id="time-format-toggle">
+                        <span class="switch-track" aria-hidden="true"></span>
+                        24-hour time
+                    </label>
+                </section>
+            </aside>
+            <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+            <main class="calendar" id="calendar-container" aria-live="polite"></main>
+        </div>
+    </div>
+
+    <!-- New / edit event, and review of AI results -->
+    <div class="dialog-backdrop" id="form-dialog" hidden>
+        <div class="dialog dialog-form" role="dialog" aria-modal="true" aria-labelledby="form-title">
+            <header class="dialog-header">
+                <h2 id="form-title">New event</h2>
+                <button type="button" class="icon-btn" id="close-form-btn" aria-label="Close">
+                    <svg class="icon"><use href="#icon-close"></use></svg>
+                </button>
+            </header>
+            <div class="dialog-body">
+                <div id="manual-section">
+                    <p class="note" id="edit-note" hidden></p>
+                    <div id="manual-editor"></div>
                 </div>
+                <div id="preview-section" hidden>
+                    <p class="preview-title" id="ai-preview-title"></p>
+                    <div id="ai-preview-list"></div>
+                </div>
+                <div class="form-warning" id="form-warning" hidden></div>
+            </div>
+            <footer class="dialog-footer">
+                <button type="button" class="btn btn-text" id="form-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="form-submit-btn">Save</button>
+            </footer>
+        </div>
+    </div>
 
-                <!-- Add Event Form (Hidden by default) -->
-                <section class="add-event-section" id="add-event-form" style="display: none;">
-                    <div class="section-header">
-                        <h3>Create New Event</h3>
-                        <button onclick="toggleAddEvent()" class="btn-close">✕</button>
-                    </div>
-                    
-                    <!-- AI Input Section (shown by default) -->
-                    <div id="ai-input-section" class="ai-input-section">
-                        <label for="ai-event-input">Describe your event in natural language</label>
-                        <textarea id="ai-event-input" rows="4" placeholder="e.g., Team meeting tomorrow at 3pm for 2 hours at Conference Room A"></textarea>
-                        <button onclick="addAIEvent()" class="btn-primary">
-                            <span style="color:#fff; font-weight: bold; font-size:1.2em; margin-right:8px;">✨</span>Add AI Generated Event
-                        </button>
-                        <button onclick="toggleInputMode()" class="btn-manual-toggle">Manual Input</button>
-                    </div>
-                    
-                    <!-- Manual Input Toggle Button (hidden by default) -->
-                    <button onclick="toggleInputMode()" id="ai-toggle-btn" class="btn-ai-toggle" style="display: none;">
-                        ✨ Use AI Instead
-                    </button>
-                    
-                    <!-- Manual Input Section (hidden by default) -->
-                    <div id="manual-input-section" class="manual-input-section" style="display: none;">
-                        <div class="form-group">
-                            <label for="event-title">Event Title *</label>
-                            <input type="text" id="event-title" placeholder="e.g., Team Meeting">
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="event-start">Start Time *</label>
-                                <input type="datetime-local" id="event-start">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="event-end">End Time *</label>
-                                <input type="datetime-local" id="event-end">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="event-location">Location</label>
-                            <input type="text" id="event-location" placeholder="Optional">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="event-description">Description</label>
-                            <textarea id="event-description" rows="3" placeholder="Optional"></textarea>
-                        </div>
-                        
-                        <button onclick="addEvent()" class="btn-primary">
-                            <span style="color:#fff; font-weight: bold; font-size:1.2em; margin-right:8px;">+</span>Add Event
-                        </button>
-                    </div>
-                </section>
-
-
-                <!-- Time Format Toggle -->
-                <div class="time-format-toggle">
-                    <button onclick="toggleTimeFormat()" id="time-format-btn" class="btn-time-format">
-                        🕐 Switch to 24h
-                    </button>
+    <!-- Event details -->
+    <div class="dialog-backdrop" id="event-modal" hidden>
+        <div class="dialog dialog-details" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="details-toolbar">
+                <button type="button" class="icon-btn" id="modal-edit-btn" aria-label="Edit event" title="Edit">
+                    <svg class="icon"><use href="#icon-edit"></use></svg>
+                </button>
+                <button type="button" class="icon-btn" id="modal-delete-btn" aria-label="Delete event" title="Delete">
+                    <svg class="icon"><use href="#icon-trash"></use></svg>
+                </button>
+                <button type="button" class="icon-btn" id="modal-close-btn" aria-label="Close" title="Close">
+                    <svg class="icon"><use href="#icon-close"></use></svg>
+                </button>
+            </div>
+            <div class="details-heading">
+                <span class="color-swatch" id="modal-color"></span>
+                <div>
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-time"></p>
                 </div>
             </div>
-
-            <!-- Right Column: Calendar View -->
-            <div class="right-column">
-                <section class="calendar-section">
-                    <div class="calendar-header">
-                        <button onclick="changeMonth(-1)" class="btn-nav">‹</button>
-                        <h2 id="current-month">November 2025</h2>
-                        <button onclick="changeMonth(1)" class="btn-nav">›</button>
-                    </div>
-                    
-                    <div class="view-toggle">
-                        <button onclick="setView('day')" id="view-day">Day</button>
-                        <button onclick="setView('week')" id="view-week">Week</button>
-                        <button onclick="setView('month')" id="view-month" class="active">Month</button>
-                        <button onclick="setView('year')" id="view-year">Year</button>
-                    </div>
-                    
-                    <div id="calendar-container" class="calendar-container">
-                        <!-- Calendar will be generated here -->
-                    </div>
-                </section>
+            <div class="details-row" id="modal-recurrence-row">
+                <svg class="icon"><use href="#icon-repeat"></use></svg>
+                <p id="modal-recurrence"></p>
+            </div>
+            <div class="details-row" id="modal-tz-row">
+                <svg class="icon"><use href="#icon-globe"></use></svg>
+                <p id="modal-tz"></p>
+            </div>
+            <div class="details-row" id="modal-reminders-row">
+                <svg class="icon"><use href="#icon-bell"></use></svg>
+                <p id="modal-reminders"></p>
+            </div>
+            <div class="details-row" id="modal-loc-row">
+                <svg class="icon"><use href="#icon-pin"></use></svg>
+                <p id="modal-location"></p>
+            </div>
+            <div class="details-row" id="modal-desc-row">
+                <svg class="icon"><use href="#icon-notes"></use></svg>
+                <p id="modal-description"></p>
             </div>
         </div>
     </div>
 
-    <div id="event-modal" class="modal-backdrop" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-title">Event Title</h3>
-                    <button onclick="closeEventModal()" class="btn-close-modal">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-row">
-                        <span>🕒</span>
-                        <p id="modal-time">Time</p>
-                    </div>
-                    <div class="modal-row" id="modal-loc-row">
-                        <span>📍</span>
-                        <p id="modal-location">Location</p>
-                    </div>
-                    <div class="modal-row" id="modal-desc-row">
-                        <span>📝</span>
-                        <p id="modal-description">Description</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="modal-edit-btn" class="btn-edit-large">Edit Event</button>
-                    <button id="modal-delete-btn" class="btn-delete-large">Delete</button>
-                </div>
+    <!-- Confirmations and "this event / all events" choices -->
+    <div class="dialog-backdrop" id="choice-dialog" hidden>
+        <div class="dialog dialog-small" role="dialog" aria-modal="true" aria-labelledby="choice-title">
+            <h2 id="choice-title"></h2>
+            <p id="choice-message"></p>
+            <div class="choice-options" id="choice-options"></div>
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-text" id="choice-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="choice-ok-btn">OK</button>
             </div>
         </div>
+    </div>
 
-        <script src="ics-generator.js"></script>
-        <script src="app.js"></script>
-    </body>
-    </html>
-
-    <!-- Scripts -->
-    <script src="ics-generator.js"></script>
-    <script src="app.js"></script>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+        <span id="toast-message"></span>
+        <button type="button" class="toast-action" id="toast-action" hidden></button>
+    </div>
 </body>
 </html>
