@@ -1,45 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" width="240" height="160">
-  <defs>
-    <linearGradient id="empty-gradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1a56db"/>
-      <stop offset="0.55" stop-color="#6d3fe0"/>
-      <stop offset="1" stop-color="#c8326e"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Ground shadow -->
-  <ellipse cx="118" cy="146" rx="82" ry="7" fill="#eef0f3"/>
-
-  <!-- Card behind -->
-  <rect x="66" y="30" width="124" height="104" rx="14" fill="#f1f3f4" transform="rotate(7 128 82)"/>
-
   <!-- Calendar card -->
-  <rect x="52" y="26" width="124" height="108" rx="14" fill="#ffffff" stroke="#e3e5e8" stroke-width="2"/>
-  <path d="M52 40a14 14 0 0 1 14-14h96a14 14 0 0 1 14 14v6H52z" fill="url(#empty-gradient)"/>
-  <rect x="80" y="17" width="7" height="17" rx="3.5" fill="#5f6368"/>
-  <rect x="141" y="17" width="7" height="17" rx="3.5" fill="#5f6368"/>
+  <rect x="48" y="28" width="144" height="112" rx="12" fill="#1c1c1f" stroke="#ffffff" stroke-opacity="0.13" stroke-width="1.5"/>
+  <path d="M48 54h144" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5"/>
+  <rect x="64" y="38" width="44" height="6" rx="3" fill="#ffffff" fill-opacity="0.16"/>
 
-  <!-- Day grid -->
-  <g fill="#e8eaed">
-    <circle cx="70" cy="60" r="3"/><circle cx="88" cy="60" r="3"/><circle cx="106" cy="60" r="3"/>
-    <circle cx="124" cy="60" r="3"/><circle cx="142" cy="60" r="3"/><circle cx="160" cy="60" r="3"/>
-  </g>
+  <!-- Events, in the calendar's own muted tones -->
+  <rect x="64" y="68" width="92" height="14" rx="4" fill="#2d323f"/>
+  <rect x="64" y="68" width="3" height="14" rx="1.5" fill="#7c93c3"/>
+  <rect x="64" y="90" width="68" height="14" rx="4" fill="#3f382b"/>
+  <rect x="64" y="90" width="3" height="14" rx="1.5" fill="#c9a96e"/>
+  <rect x="64" y="112" width="80" height="14" rx="4" fill="#323932"/>
+  <rect x="64" y="112" width="3" height="14" rx="1.5" fill="#8fae8b"/>
 
-  <!-- Events -->
-  <rect x="64" y="72" width="70" height="11" rx="5.5" fill="#e8effd"/>
-  <rect x="64" y="72" width="11" height="11" rx="5.5" fill="#1a56db"/>
-  <rect x="94" y="90" width="66" height="11" rx="5.5" fill="#efe8fd"/>
-  <rect x="94" y="90" width="11" height="11" rx="5.5" fill="#6d3fe0"/>
-  <rect x="64" y="108" width="56" height="11" rx="5.5" fill="#fce8f0"/>
-  <rect x="64" y="108" width="11" height="11" rx="5.5" fill="#c8326e"/>
-
-  <!-- Add badge -->
-  <circle cx="176" cy="120" r="19" fill="url(#empty-gradient)"/>
-  <path d="M176 111v18M167 120h18" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
-
-  <!-- Sparkles -->
-  <path d="M196 24c1 5.2 2.4 6.6 7.6 7.6-5.2 1-6.6 2.4-7.6 7.6-1-5.2-2.4-6.6-7.6-7.6 5.2-1 6.6-2.4 7.6-7.6z" fill="url(#empty-gradient)"/>
-  <path d="M34 72c.6 3.2 1.5 4.1 4.7 4.7-3.2.6-4.1 1.5-4.7 4.7-.6-3.2-1.5-4.1-4.7-4.7 3.2-.6 4.1-1.5 4.7-4.7z" fill="#c8326e" opacity="0.8"/>
-  <circle cx="208" cy="78" r="4" fill="#6d3fe0" opacity="0.45"/>
-  <circle cx="40" cy="116" r="3" fill="#1a56db" opacity="0.4"/>
+  <!-- Stars -->
+  <path d="M190 14c1.1 7 4.9 10.9 12 12-7.1 1.1-10.9 5-12 12-1.1-7-5-10.9-12-12 7.1-1.1 10.9-5 12-12z" fill="#e6dfd1"/>
+  <path d="M34 106c.5 3.2 2.3 5 5.5 5.5-3.2.5-5 2.3-5.5 5.5-.5-3.2-2.3-5-5.5-5.5 3.2-.5 5-2.3 5.5-5.5z" fill="#e6dfd1" fill-opacity="0.45"/>
 </svg>

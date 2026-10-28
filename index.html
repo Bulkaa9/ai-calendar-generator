@@ -3,216 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Calendar</title>
-    <!-- Tab icon: SVG where supported, PNG for Safari, .ico for older browsers, and the iOS home screen icon -->
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#141416">
+    <meta name="description" content="Describe events in plain language. AI turns them into calendar events you can review, edit and export to Google Calendar, Apple Calendar or Outlook.">
+    <title>AI Calendar — turn plain language into calendar events</title>
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="src/app.js"></script>
+    <link rel="stylesheet" href="landing.css">
 </head>
-<body>
-    <!-- Icon set: 24x24 line icons, used with <svg class="icon"><use href="#icon-name"></use></svg> -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true" focusable="false">
-        <defs>
-            <linearGradient id="accent-gradient" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#1a56db"/>
-                <stop offset="0.55" stop-color="#6d3fe0"/>
-                <stop offset="1" stop-color="#c8326e"/>
-            </linearGradient>
-        </defs>
-        <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-        <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
-        <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
-        <symbol id="icon-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
-        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
-        <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
-        <symbol id="icon-sparkle" viewBox="0 0 24 24"><path fill="url(#accent-gradient)" stroke="none" d="M11 3c.9 4.7 2.3 6.1 7 7-4.7.9-6.1 2.3-7 7-.9-4.7-2.3-6.1-7-7 4.7-.9 6.1-2.3 7-7zM19 14.5c.35 1.85 .9 2.4 2.75 2.75-1.85.35-2.4.9-2.75 2.75-.35-1.85-.9-2.4-2.75-2.75 1.85-.35 2.4-.9 2.75-2.75z"/></symbol>
-        <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-3-3L5 17v3zM13.5 8.5l2 2"/></symbol>
-        <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 11v6M14.5 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4.5h6V7"/></symbol>
-        <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
-        <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 0 1 13 0c0 5.2-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
-        <symbol id="icon-repeat" viewBox="0 0 24 24"><path d="M17 3.5l3 3-3 3M4.5 11.5V10a3.5 3.5 0 0 1 3.5-3.5h12M7 20.5l-3-3 3-3M19.5 12.5V14a3.5 3.5 0 0 1-3.5 3.5H4"/></symbol>
-        <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M6.5 16v-5a5.5 5.5 0 0 1 11 0v5l1.5 2h-14zM10 20.5a2 2 0 0 0 4 0"/></symbol>
-        <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/></symbol>
-        <symbol id="icon-notes" viewBox="0 0 24 24"><path d="M5 6.5h14M5 10.5h14M5 14.5h10M5 18.5h7"/></symbol>
-        <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
-        <symbol id="icon-warning" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3zM12 10v4.5M12 17.2v.1"/></symbol>
-        <symbol id="icon-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
-    </svg>
-
-    <div class="app" id="app">
-        <header class="topbar">
-            <button type="button" class="icon-btn sidebar-toggle" id="sidebar-toggle" aria-label="Show menu" aria-expanded="false" aria-controls="sidebar">
-                <svg class="icon"><use href="#icon-menu"></use></svg>
-            </button>
-            <div class="brand">
-                <img src="images/logo.svg" alt="" width="32" height="32">
+<body class="landing">
+    <header class="site-header">
+        <div class="container site-header-inner">
+            <a class="brand" href="index.html">
+                <img src="images/logo.svg" alt="" width="24" height="24">
                 <span>AI Calendar</span>
-            </div>
-            <div class="topbar-nav">
-                <button type="button" class="btn btn-outline" id="today-btn">Today</button>
-                <button type="button" class="icon-btn" id="prev-btn" aria-label="Previous">
-                    <svg class="icon"><use href="#icon-chevron-left"></use></svg>
-                </button>
-                <button type="button" class="icon-btn" id="next-btn" aria-label="Next">
-                    <svg class="icon"><use href="#icon-chevron-right"></use></svg>
-                </button>
-                <h1 class="period-title" id="current-period"></h1>
-            </div>
-            <div class="topbar-actions">
-                <div class="segmented" role="group" aria-label="Calendar view">
-                    <button type="button" data-view="day">Day</button>
-                    <button type="button" data-view="week">Week</button>
-                    <button type="button" data-view="month" class="active">Month</button>
-                    <button type="button" data-view="year">Year</button>
+            </a>
+            <nav class="site-nav" aria-label="Main">
+                <a href="#how">How it works</a>
+                <a href="#features">Features</a>
+                <a class="btn btn-ghost" href="app.html">Open calendar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-inner">
+                <h1>Describe your week.<br>Get a calendar.</h1>
+                <p class="lead">Type events in plain language. AI turns them into calendar events you can review, edit and export to Google Calendar, Apple Calendar or Outlook.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary btn-lg" href="app.html">Open the calendar</a>
+                    <a class="btn btn-quiet btn-lg" href="#how">See how it works</a>
                 </div>
-                <button type="button" class="btn btn-primary" id="download-btn" disabled>
-                    <svg class="icon"><use href="#icon-download"></use></svg>
-                    <span>Export</span>
-                </button>
+                <p class="fine-print">Free. No account. Nothing to install.</p>
             </div>
-        </header>
+        </section>
 
-        <div class="layout">
-            <aside class="sidebar" id="sidebar">
-                <button type="button" class="create-btn" id="create-btn">
-                    <svg class="icon"><use href="#icon-plus"></use></svg>
-                    Create
-                </button>
-
-                <section class="ai-card" aria-labelledby="ai-card-title">
-                    <div class="ai-card-header">
-                        <svg class="icon"><use href="#icon-sparkle"></use></svg>
-                        <h2 id="ai-card-title">Ask AI</h2>
+        <!-- What you type, and what you get -->
+        <section class="demo" aria-label="Example">
+            <div class="container">
+                <div class="demo-card">
+                    <div class="demo-prompt">
+                        <span class="demo-label">You type</span>
+                        <p>Gym every Monday and Wednesday at 7pm until the end of March, remind me 30 min before</p>
                     </div>
-                    <label class="visually-hidden" for="ai-event-input">Describe events to add, or changes to make</label>
-                    <textarea id="ai-event-input" rows="3" maxlength="1000" placeholder="Gym every Monday at 7pm&#10;Move the gym to 8pm"></textarea>
-                    <div class="ai-actions">
-                        <button type="button" id="ai-submit-btn" class="btn btn-primary">Add events</button>
-                        <button type="button" id="ai-change-btn" class="btn btn-tonal" disabled>Change events</button>
+                    <div class="demo-result">
+                        <span class="demo-label">You get</span>
+                        <ul class="demo-events">
+                            <li>
+                                <div>
+                                    <strong>Gym</strong>
+                                    <span>Mon and Wed, 7:00 – 8:00 PM · until Mar 31</span>
+                                    <span>Reminder 30 min before</span>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-                </section>
-
-                <section class="mini-month" id="mini-month" aria-label="Month overview"></section>
-
-                <section class="events-panel" aria-labelledby="events-title">
-                    <div class="panel-header">
-                        <h2 id="events-title">Your events</h2>
-                        <span class="count-badge" id="event-count">0</span>
-                    </div>
-                    <div id="events-list" class="events-list"></div>
-                </section>
-
-                <section class="settings" aria-label="Settings">
-                    <label for="timezone-select">Time zone</label>
-                    <select id="timezone-select"></select>
-                    <label class="switch">
-                        <input type="checkbox" id="time-format-toggle">
-                        <span class="switch-track" aria-hidden="true"></span>
-                        24-hour time
-                    </label>
-                </section>
-            </aside>
-            <div class="resize-handle" id="sidebar-resize" role="separator" aria-orientation="vertical"
-                aria-controls="sidebar" aria-label="Resize sidebar" tabindex="0" title="Drag to resize"></div>
-            <div class="sidebar-scrim" id="sidebar-scrim"></div>
-
-            <main class="calendar" id="calendar-container" aria-live="polite"></main>
-        </div>
-    </div>
-
-    <!-- New / edit event, and review of AI results -->
-    <div class="dialog-backdrop" id="form-dialog" hidden>
-        <div class="dialog dialog-form" role="dialog" aria-modal="true" aria-labelledby="form-title">
-            <header class="dialog-header">
-                <h2 id="form-title">New event</h2>
-                <button type="button" class="icon-btn" id="close-form-btn" aria-label="Close">
-                    <svg class="icon"><use href="#icon-close"></use></svg>
-                </button>
-            </header>
-            <div class="dialog-body">
-                <div id="manual-section">
-                    <p class="note" id="edit-note" hidden></p>
-                    <div id="manual-editor"></div>
-                </div>
-                <div id="preview-section" hidden>
-                    <p class="preview-title" id="ai-preview-title"></p>
-                    <div id="ai-preview-list"></div>
-                </div>
-                <div class="form-warning" id="form-warning" hidden></div>
-            </div>
-            <footer class="dialog-footer">
-                <button type="button" class="btn btn-text" id="form-cancel-btn">Cancel</button>
-                <button type="button" class="btn btn-primary" id="form-submit-btn">Save</button>
-            </footer>
-        </div>
-    </div>
-
-    <!-- Event details -->
-    <div class="dialog-backdrop" id="event-modal" hidden>
-        <div class="dialog dialog-details" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-            <div class="details-toolbar">
-                <button type="button" class="icon-btn" id="modal-edit-btn" aria-label="Edit event" title="Edit">
-                    <svg class="icon"><use href="#icon-edit"></use></svg>
-                </button>
-                <button type="button" class="icon-btn" id="modal-delete-btn" aria-label="Delete event" title="Delete">
-                    <svg class="icon"><use href="#icon-trash"></use></svg>
-                </button>
-                <button type="button" class="icon-btn" id="modal-close-btn" aria-label="Close" title="Close">
-                    <svg class="icon"><use href="#icon-close"></use></svg>
-                </button>
-            </div>
-            <div class="details-heading">
-                <span class="color-swatch" id="modal-color"></span>
-                <div>
-                    <h2 id="modal-title"></h2>
-                    <p id="modal-time"></p>
                 </div>
             </div>
-            <div class="details-row" id="modal-recurrence-row">
-                <svg class="icon"><use href="#icon-repeat"></use></svg>
-                <p id="modal-recurrence"></p>
-            </div>
-            <div class="details-row" id="modal-tz-row">
-                <svg class="icon"><use href="#icon-globe"></use></svg>
-                <p id="modal-tz"></p>
-            </div>
-            <div class="details-row" id="modal-reminders-row">
-                <svg class="icon"><use href="#icon-bell"></use></svg>
-                <p id="modal-reminders"></p>
-            </div>
-            <div class="details-row" id="modal-loc-row">
-                <svg class="icon"><use href="#icon-pin"></use></svg>
-                <p id="modal-location"></p>
-            </div>
-            <div class="details-row" id="modal-desc-row">
-                <svg class="icon"><use href="#icon-notes"></use></svg>
-                <p id="modal-description"></p>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- Confirmations and "this event / all events" choices -->
-    <div class="dialog-backdrop" id="choice-dialog" hidden>
-        <div class="dialog dialog-small" role="dialog" aria-modal="true" aria-labelledby="choice-title">
-            <h2 id="choice-title"></h2>
-            <p id="choice-message"></p>
-            <div class="choice-options" id="choice-options"></div>
-            <div class="dialog-actions">
-                <button type="button" class="btn btn-text" id="choice-cancel-btn">Cancel</button>
-                <button type="button" class="btn btn-primary" id="choice-ok-btn">OK</button>
+        <section class="section" id="how">
+            <div class="container">
+                <h2 class="section-title">How it works</h2>
+                <ol class="steps">
+                    <li>
+                        <span class="step-number">1</span>
+                        <h3>Describe</h3>
+                        <p>Write events the way you would say them: "Vacation August 1 to 15", "Review on the last Friday of every month at 4pm".</p>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <h3>Review</h3>
+                        <p>Every result appears as a card you can check, edit or remove before anything is added to your calendar.</p>
+                    </li>
+                    <li>
+                        <span class="step-number">3</span>
+                        <h3>Export</h3>
+                        <p>Download a standard .ics file and import it into Google Calendar, Apple Calendar or Outlook.</p>
+                    </li>
+                </ol>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
-        <span id="toast-message"></span>
-        <button type="button" class="toast-action" id="toast-action" hidden></button>
-    </div>
+        <section class="section" id="features">
+            <div class="container">
+                <h2 class="section-title">Everything a real calendar needs</h2>
+                <ul class="features">
+                    <li>
+                        <h3>Recurring events</h3>
+                        <p>Daily, weekly, monthly or yearly: "first Monday", "last day of the month", "every two weeks", until a date or a number of times.</p>
+                    </li>
+                    <li>
+                        <h3>Change events with AI</h3>
+                        <p>"Move the gym to 8pm" or "cancel next Wednesday's gym". You see a before and after preview to apply or discard.</p>
+                    </li>
+                    <li>
+                        <h3>Time zones</h3>
+                        <p>"Call with the Tokyo office Thursday 9am Tokyo time" lands at the right local time, and repeats keep their time across daylight saving.</p>
+                    </li>
+                    <li>
+                        <h3>Reminders</h3>
+                        <p>Reminders are exported as alarms, so your calendar app notifies you.</p>
+                    </li>
+                    <li>
+                        <h3>Clash warnings</h3>
+                        <p>You are told when a new or changed event overlaps another timed event.</p>
+                    </li>
+                    <li>
+                        <h3>Day, week, month and year</h3>
+                        <p>Browse your plans in four views, edit one occurrence or a whole series, and undo mistakes.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="privacy">
+                    <h2>Your events stay with you</h2>
+                    <p>There is no account and no database. What you type is sent to the AI only to understand it. Your events live in your browser until you close the page, so download them before you leave.</p>
+                    <p class="privacy-link"><a href="data.html">See exactly what data is used, and why</a></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <div class="container cta-inner">
+                <h2>Plan your next weeks in a sentence.</h2>
+                <a class="btn btn-primary btn-lg" href="app.html">Open the calendar</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container site-footer-inner">
+            <span>© 2026 AI Calendar</span>
+            <nav class="footer-nav" aria-label="Legal">
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Use</a>
+                <a href="cookies.html">Cookie Policy</a>
+                <a href="data.html">Data we collect</a>
+            </nav>
+        </div>
+    </footer>
+    <script type="module" src="src/notice.js"></script>
 </body>
 </html>

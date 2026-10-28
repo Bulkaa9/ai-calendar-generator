@@ -40,16 +40,16 @@ Events are kept in memory only, so refreshing the page clears them. Download the
 
 ## Design
 
-The interface follows Google Calendar's conventions. It is mostly white and greys, with a blue / purple / pink accent palette:
-- Event colours are picked from six shades of these three. Every colour pair passes WCAG AA contrast.
-- The blue → purple → pink gradient is reserved for the logo, the Ask AI card and the Create button.
+A quiet dark interface: warm graphite greys, one ivory accent for primary actions and today, and a muted coral reserved for the current time and destructive actions. Event colours are six desaturated tones (slate, sage, sand, clay, lavender, teal), shown as soft tinted blocks with light text. Text uses Geist.
 
-All icons and illustrations are custom SVGs; the app uses no emoji or image icons. The tab icon (blue, purple and pink waves with a white C) comes as `images/favicon.svg`, PNG copies for Safari and the iOS home screen, and `favicon.ico` for browsers that request it. Text uses Roboto. On screens narrower than 900px the sidebar becomes a slide-out drawer, and on phones dialogs open from the bottom.
+The site has a landing page (`index.html`), the calendar (`app.html`, served at `/app`), and legal pages: Privacy Policy, Terms of Use, Cookie Policy and Data we collect. The site sets no cookies and makes no third-party requests; the legal pages describe this, so keep them in sync if that ever changes. Replace the `[contact email]` placeholders before going public.
+
+All icons and illustrations are custom SVGs; the app uses no emoji or image icons. The tab icon is `images/favicon.svg`, with PNG copies for Safari and the iOS home screen, and `favicon.ico` for browsers that request it. On screens narrower than 900px the sidebar becomes a slide-out drawer, and on phones dialogs open from the bottom.
 
 ## How it works
 
 ```
-Browser (index.html + src/*.js)                    Vercel function (api/parse-event.js)
+Browser (app.html + src/*.js)                      Vercel function (api/parse-event.js)
   text + time zone (+ events, to change them) ─▶   compact prompt ─▶ OpenAI (gpt-3.5-turbo, JSON mode)
   preview, then apply                         ◀─   validated events or changes
   renders calendar, generates .ics locally
@@ -70,10 +70,10 @@ Requirements: Node.js 20+ and the [Vercel CLI](https://vercel.com/docs/cli) (`np
 ```bash
 npm install
 vercel env add OPENAI_API_KEY   # or create .env.local with OPENAI_API_KEY=sk-...
-npm start                       # runs `vercel dev`, open http://localhost:3000
+npm start                       # runs `vercel dev`, open http://localhost:3000 (calendar at /app)
 ```
 
-The page loads its scripts as ES modules, so it must be served over HTTP. Opening `index.html` from disk will not work.
+The page loads its scripts as ES modules, so it must be served over HTTP. Opening the HTML files from disk will not work.
 
 ### Environment variables
 
@@ -97,12 +97,20 @@ Tests use Node's built-in test runner and need no extra packages. They cover:
 ## Project structure
 
 ```
-index.html            Page markup and the SVG icon set
+index.html            Landing page
+landing.css           Landing page layout (uses the tokens and buttons from styles.css)
+app.html              Calendar markup and the SVG icon set
+privacy.html          Privacy Policy
+terms.html            Terms of Use
+cookies.html          Cookie Policy
+data.html             Data we collect: every piece of data, why it is needed, who receives it, how long it is kept
+fonts/                Geist, self-hosted so no visitor data goes to a third party (SIL OFL)
 styles.css            Styles: design tokens, components, views, responsive rules
 images/               Logo and illustrations (SVG)
 src/app.js            UI state and wiring: sidebar, dialogs, AI review, undo, shortcuts
 src/calendar-view.js  Markup for the time grid (day/week), month, year and mini month
 src/ui.js             Icons, event colours, dialogs and toasts
+src/notice.js         Cookie notice shown on every page (informational: the site sets no cookies)
 src/editor.js         Event editor form (dates, all-day, repeat, reminders)
 src/events.js         Event operations: drafts, series and occurrence edits, AI change plans
 src/recurrence.js     Recurrence rules, expansion, exceptions and overrides

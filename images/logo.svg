@@ -1,17 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <defs>
-    <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1a56db"/>
-      <stop offset="0.55" stop-color="#6d3fe0"/>
-      <stop offset="1" stop-color="#c8326e"/>
-    </linearGradient>
-  </defs>
-  <rect width="48" height="48" rx="12" fill="url(#logo-gradient)"/>
-  <!-- Calendar page -->
-  <rect x="10" y="12" width="28" height="26" rx="5" fill="#ffffff"/>
-  <rect x="10" y="19" width="28" height="1.5" fill="#e3e5e8"/>
-  <rect x="16" y="8.5" width="3.5" height="7.5" rx="1.75" fill="#ffffff"/>
-  <rect x="28.5" y="8.5" width="3.5" height="7.5" rx="1.75" fill="#ffffff"/>
-  <!-- Sparkle -->
-  <path d="M24 22.5c.75 3.9 1.85 5 5.75 5.75-3.9.75-5 1.85-5.75 5.75-.75-3.9-1.85-5-5.75-5.75 3.9-.75 5-1.85 5.75-5.75z" fill="url(#logo-gradient)"/>
+  <rect width="48" height="48" rx="11" fill="#e6dfd1"/>
+  <!-- Calendar outline -->
+  <rect x="11" y="13" width="26" height="24" rx="4" fill="none" stroke="#141416" stroke-width="2.6"/>
+  <path d="M11 20.5h26" stroke="#141416" stroke-width="2.6"/>
+  <path d="M18 9.5v6M30 9.5v6" stroke="#141416" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- Star -->
+  <path d="M24 23.6c.45 2.9 2.1 4.55 5 5-2.9.45-4.55 2.1-5 5-.45-2.9-2.1-4.55-5-5 2.9-.45 4.55-2.1 5-5z" fill="#141416"/>
 </svg>

@@ -181,7 +181,7 @@ function renderEventsList() {
         listEl.innerHTML = `<div class="empty-state">
             <img src="images/empty-events.svg" alt="" width="180" height="120">
             <strong>No events yet</strong>
-            <span>Ask AI above, or press Create.</span>
+            <span>Ask AI above, or add one with the + button.</span>
         </div>`;
         return;
     }

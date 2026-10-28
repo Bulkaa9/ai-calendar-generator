@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#141416">
+    <title>Data we collect — AI Calendar</title>
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body class="landing">
+    <header class="site-header">
+        <div class="container site-header-inner">
+            <a class="brand" href="index.html">
+                <img src="images/logo.svg" alt="" width="24" height="24">
+                <span>AI Calendar</span>
+            </a>
+            <nav class="site-nav" aria-label="Main">
+                <a class="btn btn-ghost" href="app.html">Open calendar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container legal">
+        <h1>Data we collect</h1>
+        <p class="updated">Last updated: October 28, 2026</p>
+
+        <p class="summary">AI Calendar collects only what it needs to turn your words into events. There is no account, no database, no cookies, no analytics and no advertising. This page lists every piece of data the service uses.</p>
+
+        <h2>Data needed to run the service</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">When</th>
+                        <th scope="col">Why it is necessary</th>
+                        <th scope="col">Who receives it</th>
+                        <th scope="col">How long it is kept</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Data">The text you type in Ask AI</td>
+                        <td data-label="When">When you press Add events or Change events</td>
+                        <td data-label="Why it is necessary">To understand your request and turn it into events</td>
+                        <td data-label="Who receives it">Our server (hosted by Vercel) and OpenAI</td>
+                        <td data-label="How long it is kept">Not stored by us. OpenAI may keep it for a limited time under its API data policies.</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Data">Your time zone</td>
+                        <td data-label="When">With each Ask AI request</td>
+                        <td data-label="Why it is necessary">To place events at the right time</td>
+                        <td data-label="Who receives it">Our server and OpenAI</td>
+                        <td data-label="How long it is kept">Not stored by us</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Data">Your existing events: title, dates, times, time zone and repeat rule</td>
+                        <td data-label="When">Only when you press Change events</td>
+                        <td data-label="Why it is necessary">So the AI knows which event you want to change</td>
+                        <td data-label="Who receives it">Our server and OpenAI</td>
+                        <td data-label="How long it is kept">Not stored by us. Locations, descriptions and reminders are never sent.</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Data">Your IP address</td>
+                        <td data-label="When">Whenever you load a page or use Ask AI</td>
+                        <td data-label="Why it is necessary">To deliver the website, and to limit each address to 20 AI requests every 10 minutes, which protects the service from abuse</td>
+                        <td data-label="Who receives it">Vercel, our hosting provider. Our server holds it in memory for the limit.</td>
+                        <td data-label="How long it is kept">In our server's memory only while that server instance runs, usually minutes to hours; never written to storage. Vercel's request logs: a limited time set by Vercel.</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Data">Error logs</td>
+                        <td data-label="When">When a request fails</td>
+                        <td data-label="Why it is necessary">To find and fix problems. If the AI returns an unreadable answer, that answer is logged, and it can contain event details.</td>
+                        <td data-label="Who receives it">Vercel</td>
+                        <td data-label="How long it is kept">A limited time set by Vercel</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Data that stays on your device</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Why</th>
+                        <th scope="col">How long it is kept</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Data">Your calendar</td>
+                        <td data-label="Why">To show your events and create the .ics file you download. The file is made in your browser.</td>
+                        <td data-label="How long it is kept">Until you close or reload the page</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Data">Sidebar width (<code>ai-calendar.sidebar-width</code>)</td>
+                        <td data-label="Why">To remember the width you chose</td>
+                        <td data-label="How long it is kept">Until you clear this site's data in your browser</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Data">Notice closed (<code>ai-calendar.notice-dismissed</code>)</td>
+                        <td data-label="Why">So the cookie notice does not appear again</td>
+                        <td data-label="How long it is kept">Until you clear this site's data in your browser</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>What we do not collect</h2>
+        <ul>
+            <li>No name, email address, phone number or account of any kind</li>
+            <li>No cookies, analytics, advertising or tracking tools</li>
+            <li>No third-party scripts or fonts: everything on the page is served from our own site</li>
+            <li>We never sell or share your data for marketing</li>
+        </ul>
+
+        <h2>Please avoid sensitive information</h2>
+        <p>Because what you type in Ask AI is sent to OpenAI, do not include sensitive information such as health details, passwords or identification numbers. If you need them, add them yourself in an event's location or description fields, which never leave your browser.</p>
+
+        <h2>More details</h2>
+        <p>Read the <a href="privacy.html">Privacy Policy</a> for your rights and how to contact us, and the <a href="cookies.html">Cookie Policy</a> for what is stored in your browser.</p>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container site-footer-inner">
+            <span>© 2026 AI Calendar</span>
+            <nav class="footer-nav" aria-label="Legal">
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Use</a>
+                <a href="cookies.html">Cookie Policy</a>
+                <a href="data.html">Data we collect</a>
+            </nav>
+        </div>
+    </footer>
+    <script type="module" src="src/notice.js"></script>
+</body>
+</html>

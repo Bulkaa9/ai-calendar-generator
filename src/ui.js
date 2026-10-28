@@ -4,21 +4,23 @@ import { escapeHtml } from './format.js';
 
 const $ = (id) => document.getElementById(id);
 
-// A line icon from the sprite in index.html
+// A line icon from the sprite in app.html
 export function icon(name, className = '') {
     return `<svg class="icon${className ? ` ${className}` : ''}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 }
 
 // --- Event colours ---
 
-// [solid, soft background, text on soft background]; each pair passes WCAG AA
+// [solid (dots, bars), soft background, text on soft background]. Muted tones for a dark UI;
+// each soft background is the solid mixed at 24% over the canvas, so overlapping events stay
+// opaque, and every text/soft pair is well above WCAG AA.
 const EVENT_COLORS = [
-    ['#1a56db', '#e8effd', '#1a3f9c'], // blue
-    ['#6d3fe0', '#efe8fd', '#4a22a8'], // purple
-    ['#c8326e', '#fce8f0', '#9a1d50'], // pink
-    ['#4f46e5', '#ebeafd', '#3730a3'], // indigo
-    ['#9333ea', '#f4e9fe', '#6b21a8'], // violet
-    ['#b5307f', '#fbe8f3', '#86185c'] // magenta
+    ['#7c93c3', '#2d323f', '#c5d1ea'], // slate blue
+    ['#8fae8b', '#323932', '#cfe2cc'], // sage
+    ['#c9a96e', '#3f382b', '#ebdcbd'], // sand
+    ['#c98b7e', '#3f312f', '#edcdc6'], // clay
+    ['#9d8ec0', '#35313f', '#d9d1ee'], // lavender
+    ['#6fa5a8', '#2a3739', '#c3e0e2'] // teal
 ];
 
 // Inline style setting --event, --event-soft and --event-text for an event (stable per id)
